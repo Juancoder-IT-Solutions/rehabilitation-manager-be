@@ -35,7 +35,6 @@ class Services extends Connection
 
             $form = array(
                 $this->name         => $this->clean($this->inputs[$this->name]),
-                'rehab_center_id'   => $this->clean($this->inputs['rehab_center_id']),
                 'service_fee'       => $this->clean($this->inputs['service_fee']),
                 'service_desc'      => $this->clean($this->inputs['service_desc']),
                 'rehab_center_id' => $this->authRehabCenterId

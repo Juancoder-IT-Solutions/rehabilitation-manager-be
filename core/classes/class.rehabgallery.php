@@ -167,7 +167,8 @@ class RehabGallery extends Connection
 
     public function show()
 {
-    $param = $this->inputs['param'] ?? null;
+    
+    $param = isset($this->inputs['param']) ? $this->inputs['param'] : null;
     $rows = [];
     $count = 1;
     $result = $this->select($this->table, '*', $param);

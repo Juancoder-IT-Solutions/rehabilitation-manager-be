@@ -14,6 +14,37 @@ class Users extends Connection
 
     public $authUserId = 0;
 
+    public function login()
+    {
+        try {
+            $this->response = "success";
+            $this->checker();
+
+            $username = $this->clean($this->inputs['username']);
+            $inputPassword = $this->inputs['password'];
+
+            $result = $this->select("tbl_users AS u LEFT JOIN tbl_rehab_centers AS r ON r.rehab_center_id = u.rehab_center_id", "u.user_id,  u.username, u.password, u.rehab_center_id, r.rehab_center_name, r.rehab_center_city, r.rehab_center_complete_address, r.rehab_center_coordinates", "u.username = '$username' LIMIT 1");
+
+            if ($result->num_rows === 0) {
+                return 0; 
+            }
+
+            $user = $result->fetch_assoc();
+            if (!password_verify($inputPassword, $user['password'])) {
+                return 0; 
+            }
+
+            unset($user['password']);
+
+            return $user;
+        } catch (Exception $e) {
+            $this->response = "error";
+            return $e->getMessage();
+        }
+    }
+
+
+
     public function add()
     {
         try {

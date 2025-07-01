@@ -36,20 +36,26 @@ if (isset($_GET['action'])) {
             Routes::get('preset_user', 'preset'),
             Routes::get('schema_user', 'schema')
         )),
+        Routes::group('RehabCenters', array_merge(
+            Routes::get('show_services', 'show'),
+            Routes::post('delete_services', 'remove'),
+            Routes::post('register_rehab_center', 'register')
+            
+        )),
         Routes::group('Services', array_merge(
             Routes::get('show_services', 'show'),
             Routes::post('delete_services', 'remove'),
             Routes::post('add_services', 'add'),
-            Routes::post('update_services', 'edit'),
+            Routes::post('update_services', 'edit')
             
         )),
         Routes::group('RehabGallery', array_merge(
             Routes::get('show_rahab_gallery', 'show'),
             Routes::post('delete_rehab_gallery', 'remove'),
             Routes::post('add_rehab_gallery', 'add'),
-            Routes::post('update_rahab_gallery', 'edit'),
+            Routes::post('update_rahab_gallery', 'edit')
             
-        )),
+        ))
         
     );
 
