@@ -90,4 +90,24 @@ class Users extends Connection
         $row = $result->fetch_assoc();
         return $row[$self->name];
     }
+
+    public function login_mobile(){
+        $username = $this->clean($this->inputs['username']);
+        $inputPassword = $this->clean($this->inputs['password']);
+        
+        $result = $this->select($this->table, "*", "u.username = '$username' LIMIT 1");
+
+        if ($result->num_rows === 0) {
+            return 0; 
+        }
+
+        $user = $result->fetch_assoc();
+        if (!password_verify($inputPassword, $user['password'])) {
+            return 0; 
+        }
+
+        unset($user['password']);
+
+        return $user;
+    }
 }

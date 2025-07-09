@@ -30,6 +30,7 @@ if (isset($_GET['action'])) {
             Routes::post('edit_user_printer', 'edit_printer'),
             Routes::delete('delete_user', 'remove'),
             Routes::post('login_user', 'login'),
+            Routes::post('login_mobile', 'login_mobile'),
             Routes::post('verify_token', 'verify_token'),
             Routes::post('update_user_login_status_logout', 'update_user_login_status_logout'),
             Routes::get('logout_user', 'logout'),
