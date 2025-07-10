@@ -26,12 +26,12 @@ class Users extends Connection
             $result = $this->select("tbl_users AS u LEFT JOIN tbl_rehab_centers AS r ON r.rehab_center_id = u.rehab_center_id", "u.user_id,  u.username, u.password, u.rehab_center_id, r.rehab_center_name, r.rehab_center_city, r.rehab_center_complete_address, r.rehab_center_coordinates", "u.username = '$username' LIMIT 1");
 
             if ($result->num_rows === 0) {
-                return 0; 
+                return 0;
             }
 
             $user = $result->fetch_assoc();
             if (!password_verify($inputPassword, $user['password'])) {
-                return 0; 
+                return 0;
             }
 
             unset($user['password']);
@@ -63,12 +63,16 @@ class Users extends Connection
                 return 2;
             }
 
+            $password = $this->inputs['password'];
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
             $form = array(
-                'user_fullname'     => $this->clean($this->inputs['user_fullname']),
-                'user_category'     => '',
-                'username'          => $username,
-                'password'          => md5($this->inputs['password'])
+                'user_fullname' => $this->clean($this->inputs['user_fullname']),
+                'user_category' => '',
+                'username'      => $username,
+                'password'      => $hashed_password
             );
+
             $insert_query = $this->insert($this->table, $form);
             if (!is_int($insert_query))
                 throw new Exception($insert_query);
@@ -83,6 +87,7 @@ class Users extends Connection
     }
 
 
+
     public static function name($primary_id)
     {
         $self = new self;
@@ -91,19 +96,20 @@ class Users extends Connection
         return $row[$self->name];
     }
 
-    public function login_mobile(){
+    public function login_mobile()
+    {
         $username = $this->clean($this->inputs['username']);
         $inputPassword = $this->clean($this->inputs['password']);
-        
+
         $result = $this->select($this->table, "*", "u.username = '$username' LIMIT 1");
 
         if ($result->num_rows === 0) {
-            return 0; 
+            return 0;
         }
 
         $user = $result->fetch_assoc();
         if (!password_verify($inputPassword, $user['password'])) {
-            return 0; 
+            return 0;
         }
 
         unset($user['password']);
