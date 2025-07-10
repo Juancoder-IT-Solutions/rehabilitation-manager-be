@@ -60,25 +60,26 @@ class Users extends Connection
                 throw new Exception($is_exist);
 
             if ($is_exist->num_rows > 0) {
-                return 2;
+                return -2;
             }
 
-            $password = $this->inputs['password'];
+            $password = $this->clean($this->inputs['password']);
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
             $form = array(
-                'user_fullname' => $this->clean($this->inputs['user_fullname']),
-                'user_category' => '',
+                'user_fname' => $this->clean($this->inputs['user_fname']),
+                'user_lname' => $this->clean($this->inputs['user_lname']),
+                'user_category' => $this->clean($this->inputs['user_category']),
                 'username'      => $username,
                 'password'      => $hashed_password
             );
 
-            $insert_query = $this->insert($this->table, $form);
+            $insert_query = $this->insert($this->table, $form, "Y");
             if (!is_int($insert_query))
                 throw new Exception($insert_query);
 
             $this->commit();
-            return 1;
+            return $insert_query;
         } catch (Exception $e) {
             $this->rollback();
             $this->response = "error";
@@ -101,7 +102,7 @@ class Users extends Connection
         $username = $this->clean($this->inputs['username']);
         $inputPassword = $this->clean($this->inputs['password']);
 
-        $result = $this->select($this->table, "*", "u.username = '$username' LIMIT 1");
+        $result = $this->select($this->table, "*", "username = '$username' LIMIT 1");
 
         if ($result->num_rows === 0) {
             return 0;
@@ -115,5 +116,10 @@ class Users extends Connection
         unset($user['password']);
 
         return $user;
+    }
+
+    public function register_mobile(){
+        $this->inputs['user_category'] = 'U';
+        return $this->add();
     }
 }
