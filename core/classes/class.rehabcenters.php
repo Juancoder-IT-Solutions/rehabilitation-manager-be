@@ -89,6 +89,18 @@ class RehabCenters extends Connection
         return $rows;
     }
 
+    public function show_public()
+    {
+        $rows = array();
+        $count = 1;
+        $result = $this->select("$this->table rc LEFT JOIN tbl_services s ON rc.rehab_center_id=s.rehab_center_id", 'rc.rehab_center_id, rc.rehab_center_name, rc.rehab_center_city, rc.rehab_center_desc, COUNT(s.service_id) as total_services', "rc.rehab_center_id > 0 GROUP BY rc.rehab_center_id ORDER BY rc.rehab_center_name ASC");
+        while ($row = $result->fetch_assoc()) {
+            $row['count'] = $count++;
+            $rows[] = $row;
+        }
+        return $rows;
+    }
+
     public function remove()
     {
         $ids = implode(",", $this->inputs['ids']);

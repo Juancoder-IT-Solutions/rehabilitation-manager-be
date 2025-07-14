@@ -39,7 +39,8 @@ if (isset($_GET['action'])) {
             Routes::get('schema_user', 'schema')
         )),
         Routes::group('RehabCenters', array_merge(
-            Routes::get('show_services', 'show'),
+            Routes::get('show_rehab_centers', 'show'),
+            Routes::get('show_public_rehab_centers', 'show_public'),
             Routes::post('delete_services', 'remove'),
             Routes::post('register_rehab_center', 'register')
             
