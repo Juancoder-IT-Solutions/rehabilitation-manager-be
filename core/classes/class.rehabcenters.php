@@ -93,12 +93,47 @@ class RehabCenters extends Connection
     {
         $rows = array();
         $count = 1;
-        $result = $this->select("$this->table rc LEFT JOIN tbl_services s ON rc.rehab_center_id=s.rehab_center_id", 'rc.rehab_center_id, rc.rehab_center_name, rc.rehab_center_city, rc.rehab_center_desc, COUNT(s.service_id) as total_services', "rc.rehab_center_id > 0 GROUP BY rc.rehab_center_id ORDER BY rc.rehab_center_name ASC");
+        $result = $this->select("$this->table rc LEFT JOIN tbl_services s ON rc.rehab_center_id=s.rehab_center_id LEFT JOIN tbl_rehab_center_gallery rg ON rc.rehab_center_id=rg.rehab_center_id", 'rc.rehab_center_id, rc.rehab_center_name, rc.rehab_center_city, rc.rehab_center_desc, rg.file as file_name, COUNT(DISTINCT(s.service_id)) as total_services', "rc.rehab_center_id > 0 GROUP BY rc.rehab_center_id ORDER BY rc.rehab_center_name ASC");
         while ($row = $result->fetch_assoc()) {
             $row['count'] = $count++;
             $rows[] = $row;
         }
         return $rows;
+    }
+
+    public function show_rehab_center_account(){
+        $id = $this->clean($this->inputs['id']);
+        $row = array();
+        $count = 1;
+
+        // main profile
+        $fetch_rehab_center = $this->select($this->table, "*", "rehab_center_id='$id'");
+        $rehab_center_row = $fetch_rehab_center->fetch_assoc();
+        unset($rehab_center_row['rehab_center_coordinates']);
+        unset($rehab_center_row['rehab_center_complete_address']);
+        $row['rehab_center_account'] = $rehab_center_row;
+
+        // services
+        $sRow = array();
+        $fetch_services = $this->select("tbl_services", "*", "rehab_center_id='$id'");
+        while($services_row = $fetch_services->fetch_assoc()){
+            $sRow[] = $services_row;
+        }
+
+        $row['rehab_services'] = $sRow;
+
+        // gallery
+        $gRow = array();
+        $count = 1;
+        $fetch_gallery = $this->select("tbl_rehab_center_gallery", "*", "rehab_center_id='$id'");
+        while($gallery_row = $fetch_gallery->fetch_assoc()){
+            $gallery_row['count'] = $count++;
+            $gRow[] = $gallery_row;
+        }
+
+        $row['rehab_gallery'] = $gRow;
+        
+        return $row;
     }
 
     public function remove()

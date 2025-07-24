@@ -27,12 +27,13 @@ if (isset($_GET['action'])) {
             Routes::post('reset_user_password', 'reset_password'),
             Routes::post('update_user_loginstatus', 'edit_loginstatus'),
             Routes::post('edit_user_password', 'edit_password'),
-            Routes::post('edit_user_printer', 'edit_printer'),
             Routes::delete('delete_user', 'remove'),
             Routes::post('login_user', 'login'),
             Routes::post('login_mobile', 'login_mobile'),
             Routes::post('register_mobile', 'register_mobile'),
             Routes::post('verify_token', 'verify_token'),
+            Routes::post('get_user', 'get_user'),
+            Routes::post('update_user_mobile', 'update_user'),
             Routes::post('update_user_login_status_logout', 'update_user_login_status_logout'),
             Routes::get('logout_user', 'logout'),
             Routes::get('preset_user', 'preset'),
@@ -41,6 +42,7 @@ if (isset($_GET['action'])) {
         Routes::group('RehabCenters', array_merge(
             Routes::get('show_rehab_centers', 'show'),
             Routes::get('show_public_rehab_centers', 'show_public'),
+            Routes::get('show_detail_mobile', 'show_rehab_center_account'),
             Routes::post('delete_services', 'remove'),
             Routes::post('register_rehab_center', 'register')
             

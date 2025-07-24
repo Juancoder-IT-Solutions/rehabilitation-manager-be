@@ -70,6 +70,7 @@ class Users extends Connection
                 'user_fname' => $this->clean($this->inputs['user_fname']),
                 'user_lname' => $this->clean($this->inputs['user_lname']),
                 'user_category' => $this->clean($this->inputs['user_category']),
+                'birthdate' => $this->clean($this->inputs['birthdate']),
                 'username'      => $username,
                 'password'      => $hashed_password
             );
@@ -87,7 +88,40 @@ class Users extends Connection
         }
     }
 
+    public function get_user()
+    {
+        $primary_id = $this->clean($this->inputs['id']);
+        $result = $this->select($this->table, "*", "$this->pk  = '$primary_id'");
+        $row = $result->fetch_assoc();
+        unset($row['password']);
+        return $row;
+    }
 
+    public function update_user()
+    {
+        $user_id = $this->clean($this->inputs['user_id']);
+
+        $form = array(
+            'user_fname'         => $this->clean($this->inputs['user_fname']),
+            'user_mname'         => $this->clean($this->inputs['user_mname']),
+            'user_lname'         => $this->clean($this->inputs['user_lname']),
+            'permanent_address'  => $this->clean($this->inputs['permanent_address']),
+            'birthdate'          => $this->clean($this->inputs['birthdate']),
+            'birth_place'        => $this->clean($this->inputs['birth_place']),
+            'nationality'        => $this->clean($this->inputs['nationality']),
+            'religion'           => $this->clean($this->inputs['religion']),
+            'occupation'         => $this->clean($this->inputs['occupation']),
+            'employer'           => $this->clean($this->inputs['employer']),
+            'employer_address'   => $this->clean($this->inputs['employer_address']),
+            'father_name'        => $this->clean($this->inputs['father_name']),
+            'father_address'     => $this->clean($this->inputs['father_address']),
+            'mother_name'        => $this->clean($this->inputs['mother_name']),
+            'mother_address'     => $this->clean($this->inputs['mother_address'])
+        );
+        
+        $result = $this->update($this->table, $form, "$this->pk  = '$user_id'");
+        return $result;
+    }
 
     public static function name($primary_id)
     {
