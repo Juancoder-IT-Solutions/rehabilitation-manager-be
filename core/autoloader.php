@@ -6,7 +6,7 @@ $classes = array(
     'Services'              => $pre_class . 'services.php',
     'RehabGallery'          => $pre_class . 'rehabgallery.php',
     'RehabCenters'          => $pre_class . 'rehabcenters.php',
-    
+    'Admission'             => $pre_class . 'admission.php',
 );
 
 $classes['Connection'] = "classes/defaults/class.connection.php";

@@ -60,6 +60,11 @@ if (isset($_GET['action'])) {
             Routes::post('add_rehab_gallery', 'add'),
             Routes::post('update_rahab_gallery', 'edit')
             
+        )),
+        Routes::group('Admission', array_merge(
+            Routes::post('add_admission', 'add'),
+            Routes::post('add_admission_mobile', 'add_mobile'),
+            Routes::get('show_mobile', 'show_mobile')
         ))
         
     );
