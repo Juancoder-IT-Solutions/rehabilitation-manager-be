@@ -21,6 +21,7 @@ class Services extends Connection
         try {
             $this->response = "success";
 
+
             $this->checker();
             $this->begin_transaction();
 
@@ -253,6 +254,8 @@ class Services extends Connection
 
     public function show()
     {
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
         $param = isset($this->inputs['param']) ? $this->inputs['param'] : null;
         $rows = array();
         $count = 1;

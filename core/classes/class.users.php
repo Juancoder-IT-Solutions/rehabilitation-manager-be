@@ -43,15 +43,15 @@ class Users extends Connection
             unset($user['password']);
 
             // Switch DB if tenant exists
-            if (!empty($user['rehab_center_id'])) {
-                $rehabDbName = "rehab_management_" . $user['rehab_center_id'] . "_db";
-                // Store in PHP session
-                $_SESSION['rehab_db_name'] = $rehabDbName;
-                $this->switchDatabase($rehabDbName);
-                $user['active_db'] = $rehabDbName;
-            } else {
-                $user['active_db'] = DBNAME;
-            }
+            // if (!empty($user['rehab_center_id'])) {
+            //     $rehabDbName = "rehab_management_" . $user['rehab_center_id'] . "_db";
+            //     // Store in PHP session
+            //     $_SESSION['rehab_db_name'] = $rehabDbName;
+            //     $this->switchDatabase($rehabDbName);
+            //     $user['active_db'] = $rehabDbName;
+            // } else {
+            //     $user['active_db'] = DBNAME;
+            // }
 
             return ["status" => "success", "user" => $user];
         } catch (Exception $e) {
