@@ -39,11 +39,21 @@ if (isset($_GET['action'])) {
             Routes::get('preset_user', 'preset'),
             Routes::get('schema_user', 'schema')
         )),
+        Routes::group('Inputs', array_merge(
+            Routes::post('add_inputs', 'add'),
+            Routes::post('update_inputs', 'edit'),
+            Routes::post('add_input_option', 'add_option'),
+            Routes::post('update_input_option', 'update_option'),
+            Routes::get('show_inputs', 'show'),
+            Routes::get('show_input_options', 'show_options'),
+            Routes::post('delete_inputs', 'remove'),
+            Routes::post('delete_input_options', 'remove_option')
+            
+        )),
         Routes::group('RehabCenters', array_merge(
             Routes::get('show_rehab_centers', 'show'),
             Routes::get('show_public_rehab_centers', 'show_public'),
-            Routes::get('show_detail_mobile', 'show_rehab_center_account'),
-            Routes::post('delete_services', 'remove'),
+            Routes::get('show_detail_mobile', 'show_rehab_center_account'), 
             Routes::post('register_rehab_center', 'register')
             
         )),
@@ -51,7 +61,16 @@ if (isset($_GET['action'])) {
             Routes::get('show_services', 'show'),
             Routes::post('delete_services', 'remove'),
             Routes::post('add_services', 'add'),
-            Routes::post('update_services', 'edit')
+            Routes::post('update_services', 'edit'),
+            Routes::post('add_service_stages', 'add_stages'),
+            Routes::post('update_service_stages', 'update_stages'),
+            Routes::get('show_service_stages', 'show_stages'),
+            Routes::post('delete_service_stages', 'remove_stages'),
+            Routes::get('show_service_task', 'show_task'),
+            Routes::post('add_service_stages_task', 'add_task'),
+            Routes::post('update_service_stages_task', 'update_task'),
+            Routes::post('delete_service_stages_task', 'delete_task'),
+            Routes::get('total_services', 'total_services')
             
         )),
         Routes::group('RehabGallery', array_merge(
@@ -64,7 +83,9 @@ if (isset($_GET['action'])) {
         Routes::group('Admission', array_merge(
             Routes::post('add_admission', 'add'),
             Routes::post('add_admission_mobile', 'add_mobile'),
-            Routes::get('show_mobile', 'show_mobile')
+            Routes::get('show_mobile', 'show_mobile'),
+            Routes::get('show_admissions', 'show'),
+            Routes::get('total_admission', 'total_admission'),
         ))
         
     );

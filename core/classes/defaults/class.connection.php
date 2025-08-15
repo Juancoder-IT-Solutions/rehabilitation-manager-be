@@ -7,24 +7,32 @@ class Connection
     private $password = PASSWORD;
     private $dbname = DBNAME;
     private $result = array();
-    private $mysqli = '';
+    private $mysqli;
     //private $userID = USERID;
 
 
-    public function __construct()
+    public function __construct($dbname = null)
     {
-        $this->mysqli = new mysqli($this->servername, $this->username, $this->password, $this->dbname);
-        // Check for connection errors
+        $this->connect($dbname ?? $this->dbname);
+    }
+
+    private function connect($dbname)
+    {
+        $this->mysqli = new mysqli(
+            $this->servername,
+            $this->username,
+            $this->password,
+            $dbname
+        );
+
         if ($this->mysqli->connect_error) {
             die("Connection failed: " . $this->mysqli->connect_error);
         }
+    }
 
-        // Set the character set
-        if (!$this->mysqli->set_charset("utf8")) {
-            die("Error loading character set utf8: " . $this->mysqli->error);
-        }
-
-        $this->mysqli->query("SET sql_mode = ''");
+    public function switchDatabase($dbname)
+    {
+        $this->connect($dbname);
     }
 
     public function checker()
@@ -32,6 +40,17 @@ class Connection
         if ($this->mysqli->connect_errno) {
             throw new Exception('Failed to connect to MySQL: ' . $this->mysqli->connect_error);
         }
+    }
+
+    public function databaseExists($dbname)
+    {
+        $check = new mysqli($this->servername, $this->username, $this->password);
+        if ($check->connect_error) {
+            return false;
+        }
+        $res = $check->query("SHOW DATABASES LIKE '$dbname'");
+        $check->close();
+        return $res && $res->num_rows > 0;
     }
 
     public function begin_transaction()
@@ -109,7 +128,7 @@ class Connection
     }
 
     public function updateIfNotExist($table, $form, $param = '')
-    {   
+    {
         $primary_id = $this->inputs[$this->pk];
         $inject = $param != '' ? $param : "$this->name = '" . $this->clean($this->inputs[$this->name]) . "'";
         $inject .= " AND $this->pk != '$primary_id'";

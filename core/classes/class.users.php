@@ -17,33 +17,47 @@ class Users extends Connection
     public function login()
     {
         try {
-            $this->response = "success";
-            $this->checker();
-
             $username = $this->clean($this->inputs['username']);
             $inputPassword = $this->inputs['password'];
 
-            $result = $this->select("tbl_users AS u LEFT JOIN tbl_rehab_centers AS r ON r.rehab_center_id = u.rehab_center_id", "u.user_id,  u.username, u.password, u.rehab_center_id, r.rehab_center_name, r.rehab_center_city, r.rehab_center_complete_address, r.rehab_center_coordinates", "u.username = '$username' LIMIT 1");
+            // Query from main DB
+            $result = $this->select(
+                "tbl_users AS u 
+                LEFT JOIN tbl_rehab_centers AS r 
+                ON r.rehab_center_id = u.rehab_center_id",
+                "u.user_id, u.username, u.password, u.rehab_center_id, 
+                r.rehab_center_name, r.rehab_center_city, 
+                r.rehab_center_complete_address, r.rehab_center_coordinates",
+                "u.username = '$username' LIMIT 1"
+            );
 
             if ($result->num_rows === 0) {
-                return 0;
+                return ["status" => "error", "message" => "User not found"];
             }
 
             $user = $result->fetch_assoc();
             if (!password_verify($inputPassword, $user['password'])) {
-                return 0;
+                return ["status" => "error", "message" => "Invalid password"];
             }
 
             unset($user['password']);
 
-            return $user;
+            // Switch DB if tenant exists
+            if (!empty($user['rehab_center_id'])) {
+                $rehabDbName = "rehab_management_" . $user['rehab_center_id'] . "_db";
+                // Store in PHP session
+                $_SESSION['rehab_db_name'] = $rehabDbName;
+                $this->switchDatabase($rehabDbName);
+                $user['active_db'] = $rehabDbName;
+            } else {
+                $user['active_db'] = DBNAME;
+            }
+
+            return ["status" => "success", "user" => $user];
         } catch (Exception $e) {
-            $this->response = "error";
-            return $e->getMessage();
+            return ["status" => "error", "message" => $e->getMessage()];
         }
     }
-
-
 
     public function add()
     {
@@ -118,7 +132,7 @@ class Users extends Connection
             'mother_name'        => $this->clean($this->inputs['mother_name']),
             'mother_address'     => $this->clean($this->inputs['mother_address'])
         );
-        
+
         $result = $this->update($this->table, $form, "$this->pk  = '$user_id'");
         return $result;
     }
@@ -152,7 +166,8 @@ class Users extends Connection
         return $user;
     }
 
-    public function register_mobile(){
+    public function register_mobile()
+    {
         $this->inputs['user_category'] = 'U';
         return $this->add();
     }

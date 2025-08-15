@@ -208,9 +208,10 @@ class Admission extends Connection
         $param = isset($this->inputs['param']) ? $this->inputs['param'] : null;
         $rows = array();
         $count = 1;
-        $result = $this->select($this->table, '*', $param);
+        $result = $this->select("$this->table a LEFT JOIN tbl_users u ON u.user_id=a.user_id LEFT JOIN tbl_services s ON s.service_id=a.service_id", 'a.*, u.user_fname, u.user_mname, u.user_lname, s.service_name', $param);
         while ($row = $result->fetch_assoc()) {
             $row['count'] = $count++;
+            $row['user'] = $row['user_fname']." ".$row['user_mname']." ".$row['user_lname'];
             $rows[] = $row;
         }
         return $rows;
@@ -243,5 +244,13 @@ class Admission extends Connection
         $result = $self->select($self->table, $self->name, "$self->pk  = '$primary_id'");
         $row = $result->fetch_assoc();
         return $row[$self->name];
+    }
+
+    public static function total_admission()
+    {
+        $self = new self;
+        $result = $self->select($self->table, "count(admission_id) as total");
+        $row = $result->fetch_assoc();
+        return $row['total'];
     }
 }
