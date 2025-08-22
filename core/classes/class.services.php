@@ -24,6 +24,8 @@ class Services extends Connection
 
             $this->checker();
             $this->begin_transaction();
+            $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+            $this->query("USE rehab_management_{$rehab_center_id}_db");
 
             $service_name = $this->clean($this->inputs[$this->name]);
             $is_exist = $this->select($this->table, $this->pk, "service_name = '$service_name'");
@@ -39,7 +41,7 @@ class Services extends Connection
                 $this->name         => $this->clean($this->inputs[$this->name]),
                 'service_fee'       => $this->clean($this->inputs['service_fee']),
                 'service_desc'      => $this->clean($this->inputs['service_desc']),
-                'rehab_center_id' => $this->authRehabCenterId
+                'rehab_center_id'   => $rehab_center_id
             );
             $insert_query = $this->insert($this->table, $form);
             if (!is_int($insert_query))
@@ -61,6 +63,9 @@ class Services extends Connection
 
             $this->checker();
             $this->begin_transaction();
+
+            $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+            $this->query("USE rehab_management_{$rehab_center_id}_db");
 
             $stage_name = $this->clean($this->inputs['stage_name']);
             $is_exist = $this->select('tbl_services_stages', 'stage_id', "stage_name = '$stage_name' AND service_id = '{$this->inputs['service_id']}'");
@@ -96,6 +101,9 @@ class Services extends Connection
 
             $this->checker();
             $this->begin_transaction();
+            $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+            $this->query("USE rehab_management_{$rehab_center_id}_db");
+
 
             $stage_id = $this->clean($this->inputs['stage_id']);
             $stage_name = $this->clean($this->inputs['stage_name']);
@@ -117,7 +125,7 @@ class Services extends Connection
 
             $form = array(
                 'stage_name' => $stage_name,
-                'service_id' => $service_id
+                // 'service_id' => $service_id
             );
 
             $update_query = $this->update(
@@ -146,6 +154,9 @@ class Services extends Connection
 
             $this->checker();
             $this->begin_transaction();
+            $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+            $this->query("USE rehab_management_{$rehab_center_id}_db");
+
 
             $primary_id         = $this->clean($this->inputs[$this->pk]);
             $service_name       = $this->clean($this->inputs[$this->name]);
@@ -181,6 +192,9 @@ class Services extends Connection
 
             $this->checker();
             $this->begin_transaction();
+            $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+            $this->query("USE rehab_management_{$rehab_center_id}_db");
+
 
             $task_name = $this->clean($this->inputs['task_name']);
             $is_exist = $this->select('tbl_service_stages_task', 'stage_id', "task_name = '$task_name' AND stage_id = '{$this->inputs['stage_id']}'");
@@ -217,11 +231,13 @@ class Services extends Connection
 
             $this->checker();
             $this->begin_transaction();
+            $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+            $this->query("USE rehab_management_{$rehab_center_id}_db");
 
             $task_id = $this->clean($this->inputs['task_id']);
             $task_name = $this->clean($this->inputs['task_name']);
 
-            $is_exist = $this->select('tbl_service_stages_task','task_id',"task_name = '$task_name' AND task_id != '$task_id'");
+            $is_exist = $this->select('tbl_service_stages_task', 'task_id', "task_name = '$task_name' AND task_id != '$task_id'");
 
             if (!is_object($is_exist)) {
                 throw new Exception($is_exist);
@@ -236,7 +252,7 @@ class Services extends Connection
                 'task_desc'     => $this->clean($this->inputs['task_desc'])
             );
 
-            $update_query = $this->update('tbl_service_stages_task',$form,"task_id = '$task_id'");
+            $update_query = $this->update('tbl_service_stages_task', $form, "task_id = '$task_id'");
 
             if (!is_int($update_query)) {
                 throw new Exception($update_query);
@@ -256,10 +272,10 @@ class Services extends Connection
     {
         $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
         $this->query("USE rehab_management_{$rehab_center_id}_db");
-        $param = isset($this->inputs['param']) ? $this->inputs['param'] : null;
+        // $param = isset($this->inputs['param']) ? $this->inputs['param'] : null;
         $rows = array();
         $count = 1;
-        $result = $this->select($this->table, '*', $param);
+        $result = $this->select($this->table, '*');
         while ($row = $result->fetch_assoc()) {
             $row['count'] = $count++;
             $rows[] = $row;
@@ -269,6 +285,9 @@ class Services extends Connection
 
     public function show_stages()
     {
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+
         $service_id = $this->clean($this->inputs['service_id']);
         $rows = array();
         $count = 1;
@@ -282,6 +301,9 @@ class Services extends Connection
 
     public function show_task()
     {
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+
         $stage_id = $this->clean($this->inputs['stage_id']);
         $rows = array();
         $count = 1;
@@ -292,22 +314,32 @@ class Services extends Connection
         }
         return $rows;
     }
-    
+
 
     public function remove()
     {
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+
         $ids = implode(",", $this->inputs['ids']);
         return $this->delete($this->table, "$this->pk IN ($ids)");
     }
 
     public function remove_stages()
     {
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+
         $stage_id = $this->clean($this->inputs['id']);
         return $this->delete('tbl_services_stages', "stage_id = '$stage_id'");
     }
 
     public function delete_task()
     {
+
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+
         $task_id = $this->clean($this->inputs['id']);
         return $this->delete('tbl_service_stages_task', "task_id = '$task_id'");
     }
@@ -320,10 +352,13 @@ class Services extends Connection
         return $row[$self->name];
     }
 
-    
+
     public static function total_services()
     {
         $self = new self;
+        $rehab_center_id = $self->clean($self->inputs['rehab_center_id']);
+        $self->query("USE rehab_management_{$rehab_center_id}_db");
+        
         $result = $self->select($self->table, "count(service_id) as total");
         $row = $result->fetch_assoc();
         return $row['total'];

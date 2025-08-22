@@ -21,6 +21,8 @@ class Inputs extends Connection
 
             $this->checker();
             $this->begin_transaction();
+            $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+            $this->query("USE rehab_management_{$rehab_center_id}_db");
 
             $input_label = $this->clean($this->inputs['input_label']);
             $is_exist = $this->select($this->table, $this->pk, "input_label = '$input_label'");
@@ -65,6 +67,9 @@ class Inputs extends Connection
     {
         try {
             $this->response = "success";
+            $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+            $this->query("USE rehab_management_{$rehab_center_id}_db");
+
 
             $this->checker();
             $this->begin_transaction();
@@ -76,8 +81,6 @@ class Inputs extends Connection
             if ($is_exist->num_rows > 0) {
                 return -2;
             }
-
-
 
             $form = array(
                 'input_label'      => $input_label,
@@ -100,6 +103,8 @@ class Inputs extends Connection
 
     public function show()
     {
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
         $param = isset($this->inputs['param']) ? $this->inputs['param'] : null;
         $rows = array();
         $count = 1;
@@ -110,9 +115,11 @@ class Inputs extends Connection
         }
         return $rows;
     }
-    
+
     public function show_options()
     {
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
         $input_id = $this->clean($this->inputs['input_id']);
         $rows = array();
         $count = 1;
@@ -126,8 +133,11 @@ class Inputs extends Connection
 
     public function remove_option()
     {
-        $stage_id = $this->clean($this->inputs['id']);
-        return $this->delete('tbl_input_options', "input_id = '$stage_id'");
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+
+        $input_option_id = $this->clean($this->inputs['id']);
+        return $this->delete('tbl_input_options', "input_option_id = '$input_option_id'");
     }
 
 
@@ -141,6 +151,9 @@ class Inputs extends Connection
 
     public function remove()
     {
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+
         $ids = implode(",", $this->inputs['ids']);
         return $this->delete($this->table, "$this->pk IN ($ids)");
     }
@@ -151,6 +164,8 @@ class Inputs extends Connection
             $this->response = "success";
             $this->checker();
             $this->begin_transaction();
+            $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+            $this->query("USE rehab_management_{$rehab_center_id}_db");
 
             $input_option_label = $this->clean($this->inputs['input_option_label']);
             $input_id = $this->clean($this->inputs['input_id']);
@@ -180,13 +195,15 @@ class Inputs extends Connection
             return $e->getMessage();
         }
     }
-    
+
     public function update_option()
     {
         try {
             $this->response = "success";
             $this->checker();
             $this->begin_transaction();
+            $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+            $this->query("USE rehab_management_{$rehab_center_id}_db");
 
             $input_option_id = $this->clean($this->inputs['input_option_id']);
             $input_option_label = $this->clean($this->inputs['input_option_label']);

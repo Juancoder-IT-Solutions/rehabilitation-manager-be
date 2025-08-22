@@ -249,6 +249,9 @@ class Admission extends Connection
     public static function total_admission()
     {
         $self = new self;
+        $rehab_center_id = $self->clean($self->inputs['rehab_center_id']);
+        $self->query("USE rehab_management_{$rehab_center_id}_db");
+        
         $result = $self->select($self->table, "count(admission_id) as total");
         $row = $result->fetch_assoc();
         return $row['total'];

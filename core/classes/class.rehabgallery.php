@@ -37,6 +37,8 @@ class RehabGallery extends Connection
 
             $this->checker();
             $this->begin_transaction();
+            $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+            $this->query("USE rehab_management_{$rehab_center_id}_db");
 
             $file_b64 = $this->clean($this->inputs[$this->name]);
             $upload_dir = realpath(__DIR__ . '/../../gallery/') . '/';
@@ -65,7 +67,7 @@ class RehabGallery extends Connection
 
                 $form = array(
                     $this->name => $file_name,
-                    'rehab_center_id' => $this->authRehabCenterId
+                    'rehab_center_id' => $rehab_center_id
                 );
                 $insert_query = $this->insert($this->table, $form);
 
@@ -93,25 +95,22 @@ class RehabGallery extends Connection
 
             $this->checker();
             $this->begin_transaction();
+            $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+            $this->query("USE rehab_management_{$rehab_center_id}_db");
 
-            $service_id = $this->clean($this->inputs[$this->pk]); // Primary Key
-            $file_b64 = $this->clean($this->inputs[$this->name]);
+            $id = $this->clean($this->inputs[$this->pk]);
+            $file_b64 = $this->inputs[$this->name] ?? "";
 
             // Check if record exists
-            $is_exist = $this->select($this->table, "{$this->name}", "{$this->pk} = '$service_id'");
-
-            if (!is_object($is_exist)) {
-                throw new Exception($is_exist);
-            }
-
-            if ($is_exist->num_rows == 0) {
+            $is_exist = $this->select($this->table, "{$this->name}", "{$this->pk} = '$id'");
+            if (!$is_exist || $is_exist->num_rows == 0) {
                 return -1; // Record not found
             }
 
             $row = $is_exist->fetch_assoc();
             $old_file_name = $row[$this->name];
 
-            $upload_dir = realpath(__DIR__ . '/../../gallery/') . '/';
+            $upload_dir = __DIR__ . '/../../gallery/';
 
             if (!is_dir($upload_dir)) {
                 mkdir($upload_dir, 0755, true);
@@ -119,9 +118,9 @@ class RehabGallery extends Connection
 
             // Process base64 image
             if (preg_match('/^data:image\/(\w+);base64,/', $file_b64, $matches)) {
-                $image_type = $matches[1]; // jpg, png, etc.
+                $image_type = $matches[1];
                 $file_b64 = substr($file_b64, strpos($file_b64, ',') + 1);
-                $file_b64 = base64_decode($file_b64); // Decode Base64
+                $file_b64 = base64_decode($file_b64);
 
                 if ($file_b64 === false) {
                     throw new Exception("Invalid Base64 encoding.");
@@ -130,30 +129,25 @@ class RehabGallery extends Connection
                 $file_name = uniqid($this->authRehabCenterId . '-', true) . "." . $image_type;
                 $file_path = $upload_dir . $file_name;
 
-                // Save new image
                 if (!file_put_contents($file_path, $file_b64)) {
                     throw new Exception("Failed to save image.");
                 }
 
-                // Delete old image if exists
+                // Delete old image
                 if (!empty($old_file_name) && file_exists($upload_dir . $old_file_name)) {
-                    unlink($upload_dir . $old_file_name);
+                    @unlink($upload_dir . $old_file_name);
                 }
 
-                // Prepare updated data
-                $form = array(
-                    $this->name => $file_name,
-                );
+                // Update DB
+                $form = array($this->name => $file_name);
+                $update_query = $this->update($this->table, $form, "{$this->pk} = '$id'");
 
-                // Perform update
-                $update_query = $this->update($this->table, $form, "{$this->pk} = '$service_id'");
-
-                if (!is_int($update_query)) {
-                    throw new Exception($update_query);
+                if ($update_query === false) {
+                    throw new Exception("Failed to update record.");
                 }
 
                 $this->commit();
-                return 1; // Success
+                return 1;
             } else {
                 throw new Exception("Invalid file format.");
             }
@@ -164,36 +158,38 @@ class RehabGallery extends Connection
         }
     }
 
-
     public function show()
-{
-    
-    $param = isset($this->inputs['param']) ? $this->inputs['param'] : null;
-    $rows = [];
-    $count = 1;
-    $result = $this->select($this->table, '*', $param);
+    {
 
-    while ($row = $result->fetch_assoc()) {
-        $row['count'] = $count++;
-        
-        if (!empty($row['file'])) {
-            $filePath = realpath(__DIR__ . '/../../gallery/') . '/' . $row['file'];
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
 
-            if (file_exists($filePath)) {
-                $row['file_b64'] = base64_encode(file_get_contents($filePath));
+        // $param = isset($this->inputs['param']) ? $this->inputs['param'] : null;
+        $rows = [];
+        $count = 1;
+        $result = $this->select($this->table, '*');
+
+        while ($row = $result->fetch_assoc()) {
+            $row['count'] = $count++;
+
+            if (!empty($row['file'])) {
+                $filePath = realpath(__DIR__ . '/../../gallery/') . '/' . $row['file'];
+
+                if (file_exists($filePath)) {
+                    $row['file_b64'] = base64_encode(file_get_contents($filePath));
+                } else {
+                    $row['file_b64'] = null;
+                }
             } else {
                 $row['file_b64'] = null;
             }
-        } else {
-            $row['file_b64'] = null;
+
+            unset($row['file']); // Remove original file path if not needed
+            $rows[] = $row;
         }
 
-        unset($row['file']); // Remove original file path if not needed
-        $rows[] = $row;
+        return $rows;
     }
-
-    return $rows;
-}
 
 
     public function remove()
@@ -202,6 +198,8 @@ class RehabGallery extends Connection
             $this->response = "success";
             $this->checker();
             $this->begin_transaction();
+            $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+            $this->query("USE rehab_management_{$rehab_center_id}_db");
 
             $ids = implode(",", array_map([$this, 'clean'], $this->inputs['ids']));
             $upload_dir = __DIR__ . "/../../gallery/";
