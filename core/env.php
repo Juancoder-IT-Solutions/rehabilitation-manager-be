@@ -1,8 +1,8 @@
 <?php
 
-define('APP_FOLDER', 'ersi-be');
-define('BASE_URL', 'https://esmeatcorp.com/' . APP_FOLDER . '/');
-define("BASE_PATH", __DIR__ . "/ersi-be/");
+define('APP_FOLDER', 'rehabilation-manager-be');
+define('BASE_URL', 'https://localhost' . APP_FOLDER . '/');
+define("BASE_PATH", __DIR__ . "/rehabilation-manager-be/");
 define('DEVELOPMENT', false);
 
 define("HOST", "localhost");
