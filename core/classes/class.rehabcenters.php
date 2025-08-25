@@ -407,6 +407,9 @@ class RehabCenters extends Connection
     public function show_rehab_center_account()
     {
         $id = $this->clean($this->inputs['id']);
+
+        // use rehab center database
+        $this->raw_query("USE rehab_management_" . $id . "_db");
         $row = array();
         $count = 1;
 

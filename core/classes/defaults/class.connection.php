@@ -153,6 +153,12 @@ class Connection
         return $this->mysqli->query($sql) === TRUE ? 1 : $this->mysqli->error;
     }
 
+    public function raw_query($query = "")
+    {
+        $sql = $this->clean($query);
+        return $this->mysqli->query($sql);
+    }
+
     public $sql;
 
     public function select($table, $rows = "*", $where = null)
