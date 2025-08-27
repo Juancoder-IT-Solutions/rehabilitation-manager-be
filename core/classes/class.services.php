@@ -299,6 +299,23 @@ class Services extends Connection
         return $rows;
     }
 
+    public function show_stages_mobile()
+    {
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+
+        $service_id = $this->clean($this->inputs['service_id']);
+        $rows = array();
+        $count = 1;
+
+        $result = $this->select('tbl_services_stages ss LEFT JOIN tbl_service_stages_task st ON ss.stage_id=st.stage_id', 'ss.*, COUNT(st.task_id) AS task_count', "ss.service_id='$service_id' GROUP BY ss.stage_id");
+        while ($row = $result->fetch_assoc()) {
+            $row['count'] = $count++;
+            $rows[] = $row;
+        }
+        return $rows;
+    }
+
     public function show_task()
     {
         $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);

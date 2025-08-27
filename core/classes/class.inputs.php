@@ -131,6 +131,27 @@ class Inputs extends Connection
         return $rows;
     }
 
+    public function show_mobile()
+    {
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+        $rows = array();
+        $count = 1;
+        $result = $this->select($this->table, '*', "input_id > 0");
+        while ($row = $result->fetch_assoc()) {
+            
+            $details = array();
+            $fetch_details = $this->select("tbl_input_options", "*", "input_id='$row[input_id]'");
+            while($details_row = $fetch_details->fetch_assoc()){
+                $details[] = $details_row;
+            }
+
+            $row['input_options'] = $details;
+            $rows[] = $row;
+        }
+        return $rows;
+    }
+
     public function remove_option()
     {
         $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);

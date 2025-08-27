@@ -45,6 +45,7 @@ if (isset($_GET['action'])) {
             Routes::post('add_input_option', 'add_option'),
             Routes::post('update_input_option', 'update_option'),
             Routes::get('show_inputs', 'show'),
+            Routes::get('show_inputs_mobile', 'show_mobile'),
             Routes::get('show_input_options', 'show_options'),
             Routes::post('delete_inputs', 'remove'),
             Routes::post('delete_input_options', 'remove_option')
@@ -65,6 +66,7 @@ if (isset($_GET['action'])) {
             Routes::post('add_service_stages', 'add_stages'),
             Routes::post('update_service_stages', 'update_stages'),
             Routes::get('show_service_stages', 'show_stages'),
+            Routes::get('show_service_stages_mobile', 'show_stages_mobile'),
             Routes::post('delete_service_stages', 'remove_stages'),
             Routes::get('show_service_task', 'show_task'),
             Routes::post('add_service_stages_task', 'add_task'),
@@ -83,7 +85,7 @@ if (isset($_GET['action'])) {
         Routes::group('Admission', array_merge(
             Routes::post('add_admission', 'add'),
             Routes::post('add_admission_mobile', 'add_mobile'),
-            Routes::get('show_mobile', 'show_mobile'),
+            Routes::get('show_admission_mobile', 'show_mobile'),
             Routes::get('show_admissions', 'show'),
             Routes::get('total_admission', 'total_admission'),
         ))

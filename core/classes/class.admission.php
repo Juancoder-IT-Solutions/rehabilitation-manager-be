@@ -89,10 +89,12 @@ class Admission extends Connection
 
             $user_id                        =   $this->clean($this->inputs['user_id']);
             $rehab_center_id                =   $this->clean($this->inputs['rehab_center_id']);
-            $service_id                     =   $this->clean($this->inputs['service_id']);
+            $form_data                      =   $this->clean($this->inputs['form_data']);
+
+            $this->query("USE rehab_management_{$rehab_center_id}_db");
 
 
-            $is_exist = $this->select($this->table, $this->pk, "rehab_center_id = '$rehab_center_id' AND service_id='$service_id' AND user_id='$user_id' AND status='P'");
+            $is_exist = $this->select($this->table, $this->pk, "rehab_center_id = '$rehab_center_id' AND user_id='$user_id' AND status='P'");
 
             if (!is_object($is_exist))
                 throw new Exception($is_exist);
@@ -104,63 +106,42 @@ class Admission extends Connection
             $form = array(
                 'user_id'                        =>   $this->clean($this->inputs['user_id']),
                 'rehab_center_id'                =>   $this->clean($this->inputs['rehab_center_id']),
-                'service_id'                     =>   $this->clean($this->inputs['service_id']),
-                'admission_date'                 =>   $this->clean($this->inputs['admission_date']),
-                'discharge_date'                 =>   $this->clean($this->inputs['discharge_date']),
-                'admitting_physician'            =>   $this->clean($this->inputs['admitting_physician']),
-                'ward'                           =>   $this->clean($this->inputs['ward']),
-                'type_of_admission'              =>   $this->clean($this->inputs['type_of_admission']),
-                'referred_by'                    =>   $this->clean($this->inputs['referred_by']),
-                'social_service_classification'  =>   $this->clean($this->inputs['social_service_classification']),
-                'allergic_to'                    =>   $this->clean($this->inputs['allergic_to']),
-                'hospitalization_plan'           =>   $this->clean($this->inputs['hospitalization_plan']),
-                'health_insurance_name'          =>   $this->clean($this->inputs['health_insurance_name']),
-                'medicare'                       =>   $this->clean($this->inputs['medicare']),
-                'data_furnish_by'                =>   $this->clean($this->inputs['data_furnish_by']),
-                'address_of_informant'           =>   $this->clean($this->inputs['address_of_informant']),
-                'relation_to_patient'            =>   $this->clean($this->inputs['relation_to_patient']),
-                'admission_diagnosis'            =>   $this->clean($this->inputs['admission_diagnosis']),
-                'other_diagnosis'                =>   $this->clean($this->inputs['other_diagnosis']),
-                'principal_operation'            =>   $this->clean($this->inputs['principal_operation']),
-                'other_operation'                =>   $this->clean($this->inputs['other_operation']),
-                'accident_injury_poisoning'      =>   $this->clean($this->inputs['accident_injury_poisoning']),
-                'place_of_occurence'             =>   $this->clean($this->inputs['place_of_occurence']),
-                'disposition'                    =>   $this->clean($this->inputs['disposition']),
-                'results'                        =>   $this->clean($this->inputs['results']),
-                'attending_physician'            =>   $this->clean($this->inputs['attending_physician']),
+                'status'                         =>   'P',
                 'date_added'                     =>   $this->getCurrentDate()
             );
 
-            $insert_query = $this->insert($this->table, $form);
-            if (!is_int($insert_query))
-                throw new Exception($insert_query);
+            $admission_id = $this->insert($this->table, $form, "Y");
+            
+            if (!is_int($admission_id))
+                throw new Exception($admission_id);
 
             $this->commit();
 
-            // update user data
-            $form_user = array(
-                'user_id'           => $this->clean($this->inputs['user_id']),
-                'birth_place'       => $this->clean($this->inputs['birth_place']),
-                'birthdate'         => $this->clean($this->inputs['birthdate']),
-                'contact_number'    => $this->clean($this->inputs['contact_number']),
-                'employer'          => $this->clean($this->inputs['employer']),
-                'employer_address'  => $this->clean($this->inputs['employer_address']),
-                'father_address'    => $this->clean($this->inputs['father_address']),
-                'father_name'       => $this->clean($this->inputs['father_name']),
-                'mother_address'    => $this->clean($this->inputs['mother_address']),
-                'mother_name'       => $this->clean($this->inputs['mother_name']),
-                'nationality'       => $this->clean($this->inputs['nationality']),
-                'occupation'        => $this->clean($this->inputs['occupation']),
-                'permanent_address' => $this->clean($this->inputs['permanent_address']),
-                'religion'          => $this->clean($this->inputs['religion']),
-                'user_fname'        => $this->clean($this->inputs['user_fname']),
-                'user_mname'        => $this->clean($this->inputs['user_mname']),
-                'user_lname'        => $this->clean($this->inputs['user_lname'])
-            );
+            // insert form data
+            foreach ($form_data as $value) {
+                $form_detail = array(
+                    'input_id' => $value['input_id'],
+                    'input_value' => $value['value'],
+                    'admission_id' => $admission_id,
+                );
+                $this->insert("tbl_admission_details", $form_detail);
+            }
 
-            $this->update("tbl_users", $form_user, "user_id='$user_id'");
+            
+            if($admission_id > 0){
+                // duplicate entry to main
+                $this->query("USE rehab_management_main_db");
+                $main_db_form = array(
+                    'rehab_center_reference_id'      =>   $admission_id,
+                    'user_id'                        =>   $this->clean($this->inputs['user_id']),
+                    'rehab_center_id'                =>   $this->clean($this->inputs['rehab_center_id']),
+                    'status'                         =>   'P',
+                    'date_added'                     =>   $this->getCurrentDate()
+                );
+                $this->insert($this->table, $main_db_form);
+            }
 
-            return 1;
+            return $admission_id;
         } catch (Exception $e) {
             $this->rollback();
             $this->response = "error";
@@ -222,7 +203,7 @@ class Admission extends Connection
         $user_id = $this->clean($this->inputs['user_id']);
         $rows = array();
         $count = 1;
-        $result = $this->select("$this->table a LEFT JOIN tbl_rehab_centers rc ON a.rehab_center_id=rc.rehab_center_id LEFT JOIN tbl_services s ON a.service_id=s.service_id", '*', "a.user_id='$user_id'");
+        $result = $this->select("$this->table a LEFT JOIN tbl_rehab_centers rc ON a.rehab_center_id=rc.rehab_center_id", '*', "a.user_id='$user_id'");
         while ($row = $result->fetch_assoc()) {
             $row['count'] = $count++;
             unset($row['rehab_center_complete_address']);
