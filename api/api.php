@@ -95,6 +95,10 @@ if (isset($_GET['action'])) {
             Routes::post('add_admission_service', 'add'),
             Routes::get('show_admission_service_mobile', 'show_mobile'),
             Routes::get('show_admission_services', 'show')
+        )),
+        Routes::group('Appointments', array_merge(
+            Routes::post('add_appointment', 'add'),
+            Routes::get('show_appointments', 'show')
         ))
         
     );

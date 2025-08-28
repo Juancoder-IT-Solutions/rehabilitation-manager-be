@@ -1,8 +1,8 @@
 -- --------------------------------------------------------
 -- Host:                         127.0.0.1
--- Server version:               10.4.11-MariaDB - mariadb.org binary distribution
+-- Server version:               10.4.32-MariaDB - mariadb.org binary distribution
 -- Server OS:                    Win64
--- HeidiSQL Version:             12.10.0.7023
+-- HeidiSQL Version:             12.10.0.7000
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -18,23 +18,103 @@
 CREATE TABLE IF NOT EXISTS `tbl_admission` (
   `admission_id` int(11) NOT NULL AUTO_INCREMENT,
   `rehab_center_id` int(11) NOT NULL DEFAULT 0,
+  `admission_reference_id` int(11) DEFAULT NULL,
   `user_id` int(11) NOT NULL DEFAULT 0,
   `date_added` datetime NOT NULL DEFAULT current_timestamp(),
   `status` varchar(1) NOT NULL DEFAULT '',
   PRIMARY KEY (`admission_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table rehab_management_19_db.tbl_admission: ~0 rows (approximately)
+-- Dumping data for table rehab_management_19_db.tbl_admission: ~4 rows (approximately)
+INSERT INTO `tbl_admission` (`admission_id`, `rehab_center_id`, `admission_reference_id`, `user_id`, `date_added`, `status`) VALUES
+	(2, 19, NULL, 2, '2025-08-27 11:02:11', 'A'),
+	(3, 19, NULL, 1, '2025-08-27 11:07:04', 'F'),
+	(4, 19, NULL, 1, '2025-08-27 13:29:04', 'A'),
+	(5, 19, NULL, 1, '2025-08-27 16:45:07', 'P');
 
 -- Dumping structure for table rehab_management_19_db.tbl_admission_details
 CREATE TABLE IF NOT EXISTS `tbl_admission_details` (
   `admission_detail_id` int(11) NOT NULL AUTO_INCREMENT,
+  `admission_id` int(11) NOT NULL DEFAULT 0,
   `input_id` int(11) NOT NULL DEFAULT 0,
   `input_value` text NOT NULL,
   PRIMARY KEY (`admission_detail_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=73 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table rehab_management_19_db.tbl_admission_details: ~0 rows (approximately)
+-- Dumping data for table rehab_management_19_db.tbl_admission_details: ~72 rows (approximately)
+INSERT INTO `tbl_admission_details` (`admission_detail_id`, `admission_id`, `input_id`, `input_value`) VALUES
+	(1, 2, 4, 'test'),
+	(2, 2, 5, 'a'),
+	(3, 2, 6, 'a'),
+	(4, 2, 8, 'a'),
+	(5, 2, 11, '2025-08-20'),
+	(6, 2, 12, '1'),
+	(7, 2, 13, 'a'),
+	(8, 2, 14, 'a'),
+	(9, 2, 15, 'a'),
+	(10, 2, 16, 'a'),
+	(11, 2, 21, 'a'),
+	(12, 2, 23, 'a'),
+	(13, 2, 24, 'a'),
+	(14, 2, 28, 'a'),
+	(15, 2, 30, 'a'),
+	(16, 2, 32, 'a'),
+	(17, 2, 33, 'a'),
+	(18, 2, 34, 'a'),
+	(19, 3, 4, 'a'),
+	(20, 3, 5, 'a'),
+	(21, 3, 6, 'a'),
+	(22, 3, 8, 'a'),
+	(23, 3, 11, '2025-08-20'),
+	(24, 3, 12, '6'),
+	(25, 3, 13, 'a'),
+	(26, 3, 14, 'a'),
+	(27, 3, 15, 'a'),
+	(28, 3, 16, 'a'),
+	(29, 3, 21, 'a'),
+	(30, 3, 23, 'a'),
+	(31, 3, 24, 'a'),
+	(32, 3, 28, 'a'),
+	(33, 3, 30, 'a'),
+	(34, 3, 32, 'a'),
+	(35, 3, 33, 'a'),
+	(36, 3, 34, 'a'),
+	(37, 4, 4, 'jep'),
+	(38, 4, 5, 'a'),
+	(39, 4, 6, 'a'),
+	(40, 4, 8, 'a'),
+	(41, 4, 11, '2025-08-20'),
+	(42, 4, 12, '3'),
+	(43, 4, 13, 'a'),
+	(44, 4, 14, 'a'),
+	(45, 4, 15, 'a'),
+	(46, 4, 16, 'a'),
+	(47, 4, 21, 'a'),
+	(48, 4, 23, 'a'),
+	(49, 4, 24, 'a'),
+	(50, 4, 28, 'a'),
+	(51, 4, 30, 'a'),
+	(52, 4, 32, 'a'),
+	(53, 4, 33, 'a'),
+	(54, 4, 34, 'a'),
+	(55, 5, 4, 'a'),
+	(56, 5, 5, 'a'),
+	(57, 5, 6, 'a'),
+	(58, 5, 8, 'a'),
+	(59, 5, 11, '2025-08-26'),
+	(60, 5, 12, 'a'),
+	(61, 5, 13, 'a'),
+	(62, 5, 14, 'a'),
+	(63, 5, 15, 'a'),
+	(64, 5, 16, 'a'),
+	(65, 5, 21, 'a'),
+	(66, 5, 23, 'a'),
+	(67, 5, 24, 'a'),
+	(68, 5, 28, 'a'),
+	(69, 5, 30, 'a'),
+	(70, 5, 32, 'a'),
+	(71, 5, 33, 'a'),
+	(72, 5, 34, 'a');
 
 -- Dumping structure for table rehab_management_19_db.tbl_admission_services
 CREATE TABLE IF NOT EXISTS `tbl_admission_services` (
@@ -44,20 +124,46 @@ CREATE TABLE IF NOT EXISTS `tbl_admission_services` (
   `date_started` date DEFAULT NULL,
   `date_ended` date DEFAULT NULL,
   PRIMARY KEY (`admission_service_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table rehab_management_19_db.tbl_admission_services: ~0 rows (approximately)
+-- Dumping data for table rehab_management_19_db.tbl_admission_services: ~3 rows (approximately)
+INSERT INTO `tbl_admission_services` (`admission_service_id`, `admission_id`, `service_id`, `date_started`, `date_ended`) VALUES
+	(1, 4, 1, '2025-08-27', '2025-08-27'),
+	(2, 4, 2, '2025-08-27', '2025-08-27'),
+	(3, 5, 1, '2025-08-27', '2025-08-27');
 
 -- Dumping structure for table rehab_management_19_db.tbl_admission_tasks
 CREATE TABLE IF NOT EXISTS `tbl_admission_tasks` (
   `admission_task_id` int(11) NOT NULL AUTO_INCREMENT,
   `task_id` int(11) NOT NULL DEFAULT 0,
+  `admission_service_id` int(11) NOT NULL DEFAULT 0,
   `remarks` varchar(50) NOT NULL DEFAULT '',
   `date_added` datetime DEFAULT NULL,
   PRIMARY KEY (`admission_task_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table rehab_management_19_db.tbl_admission_tasks: ~0 rows (approximately)
+-- Dumping data for table rehab_management_19_db.tbl_admission_tasks: ~4 rows (approximately)
+INSERT INTO `tbl_admission_tasks` (`admission_task_id`, `task_id`, `admission_service_id`, `remarks`, `date_added`) VALUES
+	(1, 4, 1, 'test', '2025-08-27 16:29:39'),
+	(2, 5, 1, 'test 2', '2025-08-27 16:32:29'),
+	(3, 6, 1, 'test 3', '2025-08-28 10:56:30'),
+	(4, 8, 1, 'test 4', '2025-08-28 10:57:13');
+
+-- Dumping structure for table rehab_management_19_db.tbl_appointments
+CREATE TABLE IF NOT EXISTS `tbl_appointments` (
+  `appointment_id` int(11) NOT NULL AUTO_INCREMENT,
+  `admission_id` int(11) NOT NULL,
+  `rehab_center_id` int(11) NOT NULL,
+  `remarks` text NOT NULL,
+  `status` varchar(1) NOT NULL DEFAULT 'P',
+  `appointment_date` date NOT NULL,
+  `date_added` datetime NOT NULL,
+  PRIMARY KEY (`appointment_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- Dumping data for table rehab_management_19_db.tbl_appointments: ~1 rows (approximately)
+INSERT INTO `tbl_appointments` (`appointment_id`, `admission_id`, `rehab_center_id`, `remarks`, `status`, `appointment_date`, `date_added`) VALUES
+	(2, 4, 19, 'test', 'P', '2025-09-01', '2025-08-28 14:49:51');
 
 -- Dumping structure for table rehab_management_19_db.tbl_inputs
 CREATE TABLE IF NOT EXISTS `tbl_inputs` (
@@ -67,7 +173,7 @@ CREATE TABLE IF NOT EXISTS `tbl_inputs` (
   `input_require` int(1) NOT NULL DEFAULT 1,
   `rehab_center` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`input_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table rehab_management_19_db.tbl_inputs: ~41 rows (approximately)
 INSERT INTO `tbl_inputs` (`input_id`, `input_label`, `input_type`, `input_require`, `rehab_center`) VALUES
@@ -78,7 +184,7 @@ INSERT INTO `tbl_inputs` (`input_id`, `input_label`, `input_type`, `input_requir
 	(8, 'Tel No.', 'text', 1, 0),
 	(9, 'Sex', 'select', 1, 0),
 	(10, 'Civil Status', 'select', 1, 0),
-	(11, 'Birthdate', 'text', 1, 0),
+	(11, 'Birthdate', 'date', 1, 0),
 	(12, 'Age', 'text', 1, 0),
 	(13, 'Birthplace', 'text', 1, 0),
 	(14, 'Nationality', 'text', 1, 0),
@@ -119,7 +225,7 @@ CREATE TABLE IF NOT EXISTS `tbl_input_options` (
   `input_id` int(11) NOT NULL DEFAULT 0,
   `input_option_label` varchar(50) NOT NULL DEFAULT '',
   PRIMARY KEY (`input_option_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table rehab_management_19_db.tbl_input_options: ~28 rows (approximately)
 INSERT INTO `tbl_input_options` (`input_option_id`, `input_id`, `input_option_label`) VALUES
@@ -165,9 +271,9 @@ CREATE TABLE IF NOT EXISTS `tbl_rehab_centers` (
   `date_added` datetime NOT NULL DEFAULT current_timestamp(),
   `date_updated` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`rehab_center_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table rehab_management_19_db.tbl_rehab_centers: ~0 rows (approximately)
+-- Dumping data for table rehab_management_19_db.tbl_rehab_centers: ~1 rows (approximately)
 INSERT INTO `tbl_rehab_centers` (`rehab_center_id`, `rehab_center_name`, `rehab_center_desc`, `hospital_code`, `med_record_no`, `rehab_center_city`, `rehab_center_complete_address`, `rehab_center_coordinates`, `date_added`, `date_updated`) VALUES
 	(19, 'NEGROS OCCIDENTAL REHABILITATION CENTER', '', 'j', 'j', 'j', 'j', '14.5995133,120.984234', '2025-08-11 16:14:07', '2025-08-22 15:34:41');
 
@@ -179,7 +285,7 @@ CREATE TABLE IF NOT EXISTS `tbl_rehab_center_gallery` (
   `file_desc` varchar(100) NOT NULL DEFAULT '',
   `date_added` datetime NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table rehab_management_19_db.tbl_rehab_center_gallery: ~0 rows (approximately)
 
@@ -193,11 +299,12 @@ CREATE TABLE IF NOT EXISTS `tbl_services` (
   `date_added` datetime NOT NULL DEFAULT current_timestamp(),
   `date_updated` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`service_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table rehab_management_19_db.tbl_services: ~0 rows (approximately)
+-- Dumping data for table rehab_management_19_db.tbl_services: ~2 rows (approximately)
 INSERT INTO `tbl_services` (`service_id`, `rehab_center_id`, `service_name`, `service_fee`, `service_desc`, `date_added`, `date_updated`) VALUES
-	(1, 19, 'TREATMENT AND REHABILITATION PROGRAM', 30000.00, '', '2025-08-22 08:02:54', '2025-08-22 15:40:15');
+	(1, 19, 'TREATMENT AND REHABILITATION PROGRAM', 30000.00, '', '2025-08-22 08:02:54', '2025-08-22 15:40:15'),
+	(2, 19, 'Test', 4000.00, '', '2025-08-26 15:24:19', '2025-08-26 15:24:19');
 
 -- Dumping structure for table rehab_management_19_db.tbl_services_availed
 CREATE TABLE IF NOT EXISTS `tbl_services_availed` (
@@ -210,7 +317,7 @@ CREATE TABLE IF NOT EXISTS `tbl_services_availed` (
   `date_added` datetime NOT NULL DEFAULT current_timestamp(),
   `date_updated` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`service_availed_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table rehab_management_19_db.tbl_services_availed: ~0 rows (approximately)
 
@@ -220,13 +327,13 @@ CREATE TABLE IF NOT EXISTS `tbl_services_stages` (
   `stage_name` varchar(50) NOT NULL DEFAULT '',
   `service_id` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`stage_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- Dumping data for table rehab_management_19_db.tbl_services_stages: ~6 rows (approximately)
 INSERT INTO `tbl_services_stages` (`stage_id`, `stage_name`, `service_id`) VALUES
-	(1, 'Stage 12', 0),
-	(2, 'stage1', 0),
-	(3, 'sddsf 1', 0),
+	(1, 'Stage 12', 2),
+	(2, 'stage1', 2),
+	(3, 'Example', 1),
 	(5, 'PHASE 1: ADMISSION AND DETOXIFICATION', 1),
 	(6, 'TRANSITION PHASE', 1),
 	(7, 'PHASE 3: INTEGRATION CARE', 1);
@@ -238,9 +345,9 @@ CREATE TABLE IF NOT EXISTS `tbl_service_stages_task` (
   `task_name` varchar(50) NOT NULL DEFAULT '',
   `task_desc` varchar(250) NOT NULL DEFAULT '',
   PRIMARY KEY (`task_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table rehab_management_19_db.tbl_service_stages_task: ~6 rows (approximately)
+-- Dumping data for table rehab_management_19_db.tbl_service_stages_task: ~9 rows (approximately)
 INSERT INTO `tbl_service_stages_task` (`task_id`, `stage_id`, `task_name`, `task_desc`) VALUES
 	(2, 4, 'same', 'da'),
 	(4, 5, 'Admission and Orientation with Folks', ''),
@@ -248,7 +355,9 @@ INSERT INTO `tbl_service_stages_task` (`task_id`, `stage_id`, `task_name`, `task
 	(6, 5, 'Medical Detoxifcation', ''),
 	(7, 5, 'Medical Examination', ''),
 	(8, 6, 'Dorm Transfer', ''),
-	(9, 6, 'Patient Orientation and Observation of Daily Activ', '');
+	(9, 6, 'Patient Orientation and Observation of Daily Activ', ''),
+	(10, 1, 'Patient Orientation and Observation of Daily Activ', ''),
+	(12, 2, 'Patient Orientation and Observation of Daily 1', '');
 
 -- Dumping structure for table rehab_management_19_db.tbl_users
 CREATE TABLE IF NOT EXISTS `tbl_users` (
@@ -276,9 +385,9 @@ CREATE TABLE IF NOT EXISTS `tbl_users` (
   `date_added` datetime NOT NULL DEFAULT current_timestamp(),
   `date_updated` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Dumping data for table rehab_management_19_db.tbl_users: ~0 rows (approximately)
+-- Dumping data for table rehab_management_19_db.tbl_users: ~1 rows (approximately)
 INSERT INTO `tbl_users` (`user_id`, `user_fname`, `user_mname`, `user_lname`, `permanent_address`, `contact_number`, `birthdate`, `birth_place`, `nationality`, `religion`, `occupation`, `employer`, `employer_address`, `father_name`, `father_address`, `mother_name`, `mother_address`, `user_category`, `username`, `password`, `rehab_center_id`, `date_added`, `date_updated`) VALUES
 	(1, '', '', '', '', '', '0000-00-00', '', '', '', '', '', '', '', '', '', '', 'R', '', '$2y$10$h8eYbcAwpZFcvQK6GKHnwecv4DrcVtNzjrMSCVz3RbeAzL/OANZOe', 19, '2025-08-11 16:14:07', '2025-08-22 15:35:13');
 

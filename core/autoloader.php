@@ -9,6 +9,7 @@ $classes = array(
     'Admission'             => $pre_class . 'admission.php',
     'AdmissionServices'     => $pre_class . 'admission_services.php',
     'Inputs'                => $pre_class . 'inputs.php',
+    'Appointments'          => $pre_class . 'appointments.php',
 );
 
 $classes['Connection'] = "classes/defaults/class.connection.php";
