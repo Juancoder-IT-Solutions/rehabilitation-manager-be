@@ -67,6 +67,7 @@ if (isset($_GET['action'])) {
             Routes::post('update_service_stages', 'update_stages'),
             Routes::get('show_service_stages', 'show_stages'),
             Routes::get('show_service_stages_mobile', 'show_stages_mobile'),
+            Routes::get('show_service_stages_progress_mobile', 'show_stages_progress_mobile'),
             Routes::post('delete_service_stages', 'remove_stages'),
             Routes::get('show_service_task', 'show_task'),
             Routes::post('add_service_stages_task', 'add_task'),
@@ -86,8 +87,14 @@ if (isset($_GET['action'])) {
             Routes::post('add_admission', 'add'),
             Routes::post('add_admission_mobile', 'add_mobile'),
             Routes::get('show_admission_mobile', 'show_mobile'),
+            Routes::get('show_admission_details_mobile', 'show_detail_mobile'),
             Routes::get('show_admissions', 'show'),
             Routes::get('total_admission', 'total_admission'),
+        )),
+        Routes::group('AdmissionServices', array_merge(
+            Routes::post('add_admission_service', 'add'),
+            Routes::get('show_admission_service_mobile', 'show_mobile'),
+            Routes::get('show_admission_services', 'show')
         ))
         
     );

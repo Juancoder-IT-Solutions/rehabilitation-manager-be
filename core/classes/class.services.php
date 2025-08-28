@@ -316,6 +316,32 @@ class Services extends Connection
         return $rows;
     }
 
+    public function show_stages_progress_mobile()
+    {
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+
+        $service_id = $this->clean($this->inputs['service_id']);
+        $admission_reference_id = $this->clean($this->inputs['admission_reference_id']);
+        $rows = array();
+        $count = 1;
+
+        $result = $this->select('tbl_services_stages', '*', "service_id='$service_id'");
+        while ($row = $result->fetch_assoc()) {
+            $task_rows = array();
+            $fetch_tasks = $this->select("tbl_service_stages_task sst LEFT JOIN tbl_admission_tasks adt ON sst.task_id=adt.task_id", "sst.*, admission_task_id", "sst.stage_id='$row[stage_id]'");
+            while($task_row = $fetch_tasks->fetch_assoc()){
+                // check if has task
+                $task_row['is_done'] = $task_row['admission_task_id'] > 0 ? 1 : 0;
+                $task_rows[] = $task_row;
+            }
+
+            $row['tasks_row'] = $task_rows;
+            $rows[] = $row;
+        }
+        return $rows;
+    }
+
     public function show_task()
     {
         $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);

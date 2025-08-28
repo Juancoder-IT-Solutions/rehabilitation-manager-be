@@ -94,7 +94,7 @@ class Admission extends Connection
             $this->query("USE rehab_management_{$rehab_center_id}_db");
 
 
-            $is_exist = $this->select($this->table, $this->pk, "rehab_center_id = '$rehab_center_id' AND user_id='$user_id' AND status='P'");
+            $is_exist = $this->select($this->table, $this->pk, "rehab_center_id = '$rehab_center_id' AND user_id='$user_id' AND (status != 'F' AND status != 'D')");
 
             if (!is_object($is_exist))
                 throw new Exception($is_exist);
@@ -132,7 +132,7 @@ class Admission extends Connection
                 // duplicate entry to main
                 $this->query("USE rehab_management_main_db");
                 $main_db_form = array(
-                    'rehab_center_reference_id'      =>   $admission_id,
+                    'admission_reference_id'         =>   $admission_id,
                     'user_id'                        =>   $this->clean($this->inputs['user_id']),
                     'rehab_center_id'                =>   $this->clean($this->inputs['rehab_center_id']),
                     'status'                         =>   'P',
@@ -211,6 +211,16 @@ class Admission extends Connection
             $rows[] = $row;
         }
         return $rows;
+    }
+
+    public function show_detail_mobile(){
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $admission_id = $this->clean($this->inputs['admission_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+
+        $fetch = $this->select($this->table, "*", "admission_id='$admission_id'");
+        $row = $fetch->fetch_assoc();
+        return $row;
     }
 
     public function remove()
