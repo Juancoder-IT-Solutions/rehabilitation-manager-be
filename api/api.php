@@ -89,7 +89,7 @@ if (isset($_GET['action'])) {
             Routes::get('show_admission_mobile', 'show_mobile'),
             Routes::get('show_admission_details_mobile', 'show_detail_mobile'),
             Routes::get('show_admissions', 'show'),
-            Routes::get('total_admission', 'total_admission'),
+            Routes::get('total_admission', 'total_admission')
         )),
         Routes::group('AdmissionServices', array_merge(
             Routes::post('add_admission_service', 'add'),
