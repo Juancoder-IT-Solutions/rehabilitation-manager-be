@@ -1,5 +1,5 @@
 <?php
-error_reporting(0);
+error_reporting(1);
 //ini_set('max_execution_time', '-1');
 ini_set('date.timezone',"Asia/Manila");
 date_default_timezone_set("Asia/Manila");
