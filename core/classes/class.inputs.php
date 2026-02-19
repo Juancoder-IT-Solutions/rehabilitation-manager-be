@@ -139,10 +139,10 @@ class Inputs extends Connection
         $count = 1;
         $result = $this->select($this->table, '*', "input_id > 0");
         while ($row = $result->fetch_assoc()) {
-            
+
             $details = array();
             $fetch_details = $this->select("tbl_input_options", "*", "input_id='$row[input_id]'");
-            while($details_row = $fetch_details->fetch_assoc()){
+            while ($details_row = $fetch_details->fetch_assoc()) {
                 $details[] = $details_row;
             }
 
@@ -151,6 +151,66 @@ class Inputs extends Connection
         }
         return $rows;
     }
+
+
+    public function show_inputs()
+    {
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+
+        $rows = array();
+        $count = 1;
+
+        $result = $this->select("tbl_inputs", '*');
+
+        while ($row = $result->fetch_assoc()) {
+            $row['count'] = $count++;
+
+            if ($row['input_type'] === 'select') {
+                $options = [];
+
+                $optResult = $this->select(
+                    "tbl_input_options",
+                    "input_option_label",
+                    "input_id = '" . intval($row['input_id']) . "'"
+                );
+
+                while ($optRow = $optResult->fetch_assoc()) {
+                    $options[] = $optRow['input_option_label'];
+                }
+
+                $row['options'] = $options;
+            }
+
+            $rows[] = $row;
+        }
+
+        return $rows;
+    }
+
+    public function get_details()
+    {
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+        $admission_id = intval($this->inputs['admission_id']);
+
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+
+        $rows = [];
+        $result = $this->select(
+            "tbl_admission_details",
+            "input_id, input_value",
+            "admission_id = '$admission_id'"
+        );
+
+        while ($row = $result->fetch_assoc()) {
+            $rows[] = $row;
+        }
+
+        return $rows;
+    }
+
+
 
     public function remove_option()
     {

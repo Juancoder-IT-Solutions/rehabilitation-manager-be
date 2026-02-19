@@ -12,12 +12,11 @@ if (isset($_GET['action'])) {
     $registered_actions = array_merge(
         Routes::group('Users', array_merge(
             Routes::post('add_user', 'add'),
+            Routes::post('update_user', 'update_user'),
             Routes::get('show_user', 'show'),
             Routes::get('show_filtered_users', 'show_filtered_users'),
             Routes::get('view_user', 'view'),
             Routes::put('edit_user', 'edit'),
-            Routes::put('edit_supervisor_code', 'editSupservisorCode'),
-            Routes::put('edit_admin_code', 'editAdminCode'),
             Routes::put('edit_userInfo', 'editUserInfo'),
             Routes::put('edit_userPassword', 'editUserPassword'),
             Routes::get('check_user_pass', 'checkUserPass'),
@@ -45,6 +44,8 @@ if (isset($_GET['action'])) {
             Routes::post('add_input_option', 'add_option'),
             Routes::post('update_input_option', 'update_option'),
             Routes::get('show_inputs', 'show'),
+            Routes::get('show_admission_inputs', 'show_inputs'),
+            Routes::get('get_details_inputs', 'get_details'),
             Routes::get('show_inputs_mobile', 'show_mobile'),
             Routes::get('show_input_options', 'show_options'),
             Routes::post('delete_inputs', 'remove'),

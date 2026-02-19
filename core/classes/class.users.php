@@ -13,6 +13,7 @@ class Users extends Connection
     public $response = "";
 
     public $authUserId = 0;
+    public $authRehabCenterId = 0;
 
     public function login()
     {
@@ -95,6 +96,9 @@ class Users extends Connection
     public function update_user()
     {
         $user_id = $this->clean($this->inputs['user_id']);
+        
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
 
         $form = array(
             'user_fname'         => $this->clean($this->inputs['user_fname']),
@@ -116,9 +120,7 @@ class Users extends Connection
 
         $result = $this->update($this->table, $form, "$this->pk  = '$user_id'");
         return $result;
-    }
-
-    public static function name($primary_id)
+    }    public static function name($primary_id)
     {
         $self = new self;
         $result = $self->select($self->table, $self->name, "$self->pk  = '$primary_id'");
@@ -151,5 +153,20 @@ class Users extends Connection
     {
         $this->inputs['user_category'] = 'U';
         return $this->add();
+    }
+
+    public function show()
+    {
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+        $param = isset($this->inputs['param']) ? $this->inputs['param'] : null;
+        $rows = array();
+        $count = 1;
+        $result = $this->select($this->table, '*', $param);
+        while ($row = $result->fetch_assoc()) {
+            $row['count'] = $count++;
+            $rows[] = $row;
+        }
+        return $rows;
     }
 }

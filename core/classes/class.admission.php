@@ -111,7 +111,7 @@ class Admission extends Connection
             );
 
             $admission_id = $this->insert($this->table, $form, "Y");
-            
+
             if (!is_int($admission_id))
                 throw new Exception($admission_id);
 
@@ -127,8 +127,8 @@ class Admission extends Connection
                 $this->insert("tbl_admission_details", $form_detail);
             }
 
-            
-            if($admission_id > 0){
+
+            if ($admission_id > 0) {
                 // duplicate entry to main
                 $this->query("USE rehab_management_main_db");
                 $main_db_form = array(
@@ -178,7 +178,7 @@ class Admission extends Connection
             $this->commit();
             return 1;
         } catch (Exception $e) {
-            $this->rollback();  
+            $this->rollback();
             $this->response = "error";
             return $e->getMessage();
         }
@@ -187,12 +187,14 @@ class Admission extends Connection
     public function show()
     {
         $param = isset($this->inputs['param']) ? $this->inputs['param'] : null;
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
         $rows = array();
         $count = 1;
-        $result = $this->select("$this->table a LEFT JOIN tbl_users u ON u.user_id=a.user_id LEFT JOIN tbl_services s ON s.service_id=a.service_id", 'a.*, u.user_fname, u.user_mname, u.user_lname, s.service_name', $param);
+        $result = $this->select("$this->table a LEFT JOIN tbl_users u ON u.user_id=a.user_id", 'a.*, u.user_fname, u.user_mname, u.user_lname');
         while ($row = $result->fetch_assoc()) {
             $row['count'] = $count++;
-            $row['user'] = $row['user_fname']." ".$row['user_mname']." ".$row['user_lname'];
+            $row['user'] = $row['user_fname'] . " " . $row['user_mname'] . " " . $row['user_lname'];
             $rows[] = $row;
         }
         return $rows;
@@ -213,7 +215,8 @@ class Admission extends Connection
         return $rows;
     }
 
-    public function show_detail_mobile(){
+    public function show_detail_mobile()
+    {
         $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
         $admission_id = $this->clean($this->inputs['admission_id']);
         $this->query("USE rehab_management_{$rehab_center_id}_db");
@@ -242,7 +245,7 @@ class Admission extends Connection
         $self = new self;
         $rehab_center_id = $self->clean($self->inputs['rehab_center_id']);
         $self->query("USE rehab_management_{$rehab_center_id}_db");
-        
+
         $result = $self->select($self->table, "count(admission_id) as total");
         $row = $result->fetch_assoc();
         return $row['total'];
