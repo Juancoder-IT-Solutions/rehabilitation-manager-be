@@ -106,6 +106,7 @@ class RehabCenters extends Connection
         $this->createTblAdmissionDetails($conn);
         $this->createTblAdmissionServices($conn);
         $this->createTblAdmissionTasks($conn);
+        $this->createTblAppointments($conn);
         $this->createTblInputs($conn);
         $this->createTblInputOptions($conn);
         $this->createTblServices($conn);
@@ -118,21 +119,6 @@ class RehabCenters extends Connection
         $this->createRehabGallery($conn);
 
         $conn->close();
-    }
-
-    private function createTblAppointments($conn)
-    {
-        $sql = "CREATE TABLE `tbl_appointments` (
-            `appointment_id` INT(11) NOT NULL AUTO_INCREMENT,
-            `admission_id` INT(11) NOT NULL,
-            `rehab_center_id` INT(11) NOT NULL,
-            `remarks` TEXT NULL DEFAULT NULL,
-            `appointment_date` DATE NOT NULL,
-            `status` VARCHAR(1) NOT NULL DEFAULT '',
-            `date_added` DATETIME NOT NULL DEFAULT current_timestamp(),
-            PRIMARY KEY (`appointment_id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
-        if (!$conn->query($sql)) throw new Exception("Error creating tbl_appointments: " . $conn->error);
     }
 
     private function createTblAdmission($conn)
@@ -182,6 +168,21 @@ class RehabCenters extends Connection
         PRIMARY KEY (`admission_task_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         if (!$conn->query($sql)) throw new Exception("Error creating tbl_admission_tasks: " . $conn->error);
+    }
+
+    private function createTblAppointments($conn)
+    {
+        $sql = "CREATE TABLE `tbl_appointments` (
+            `appointment_id` INT(11) NOT NULL AUTO_INCREMENT,
+            `admission_id` INT(11) NOT NULL,
+            `rehab_center_id` INT(11) NOT NULL,
+            `remarks` TEXT NULL DEFAULT NULL,
+            `appointment_date` DATE NOT NULL,
+            `status` VARCHAR(1) NOT NULL DEFAULT '',
+            `date_added` DATETIME NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`appointment_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+        if (!$conn->query($sql)) throw new Exception("Error creating tbl_appointments: " . $conn->error);
     }
 
     private function createTblInputs($conn)
