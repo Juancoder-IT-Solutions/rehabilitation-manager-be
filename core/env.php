@@ -5,7 +5,7 @@ define('BASE_URL', 'https://localhost' . APP_FOLDER . '/');
 define("BASE_PATH", __DIR__ . "/rehabilation-manager-be/");
 define('DEVELOPMENT', false);
 
-define("HOST", "localhost");
+define("HOST", "72.60.232.151");
 define("USER", "rehab_manager_root");
 define("PASSWORD", "Z#2+771n6LSmJkdR");
 define("DBNAME", "rehab_management_main_db");
