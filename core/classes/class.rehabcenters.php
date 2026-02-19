@@ -120,6 +120,21 @@ class RehabCenters extends Connection
         $conn->close();
     }
 
+    private function createTblAppointments($conn)
+    {
+        $sql = "CREATE TABLE `tbl_appointments` (
+            `appointment_id` INT(11) NOT NULL AUTO_INCREMENT,
+            `admission_id` INT(11) NOT NULL,
+            `rehab_center_id` INT(11) NOT NULL,
+            `remarks` TEXT NULL DEFAULT NULL COLLATE 'utf8mb4_general_ci',
+            `appointment_date` DATE NOT NULL,
+            `status` VARCHAR(1) NOT NULL DEFAULT '' COLLATE 'utf8mb4_general_ci',
+            `date_added` DATETIME NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`appointment_id`) USING BTREE
+        ) COLLATE='utf8mb4_general_ci' ENGINE=InnoDB;";
+        if (!$conn->query($sql)) throw new Exception("Error creating tbl_appointments: " . $conn->error);
+    }
+
     private function createTblAdmission($conn)
     {
         $sql = "CREATE TABLE IF NOT EXISTS `tbl_admission` (
