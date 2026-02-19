@@ -100,6 +100,10 @@ if (isset($_GET['action'])) {
         Routes::group('Appointments', array_merge(
             Routes::post('add_appointment', 'add'),
             Routes::get('show_appointments', 'show')
+        )),
+        Routes::group('Payments', array_merge(
+            Routes::post('add_payment', 'add'),
+            Routes::get('show_payments', 'show')
         ))
         
     );
