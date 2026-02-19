@@ -66,9 +66,7 @@ class RehabCenters extends Connection
             $form = [
                 'username'   => $username,
                 'password'   => $hashed_password,
-                'rehab_center_id' => $rehab_center_id,
-                'date_added' => date("Y-m-d H:i:s"),
-                'date_updated' => null,
+                'rehab_center_id' => $rehab_center_id
             ];
 
             $this->insert("tbl_users", $form);
