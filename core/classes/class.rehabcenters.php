@@ -364,11 +364,9 @@ class RehabCenters extends Connection
             user_fname, user_mname, user_lname, permanent_address, contact_number,
             birthdate, birth_place, nationality, religion, occupation, employer,
             employer_address, father_name, father_address, mother_name, mother_address,
-            user_category, username, password, rehab_center_id, date_added, date_updated
-        ) VALUES (
+            user_category, username, password, rehab_center_id) VALUES (
             '', '', '', '', '', '0000-00-00', '', '', '', '', '', '', '', '', '', '',
-            'R', ?, ?, ?, NOW(), NOW()
-        )");
+            'R', ?, ?, ?)");
 
             $stmt->bind_param("ssi", $username, $hashed_password, $rehab_center_id);
 
