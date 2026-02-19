@@ -66,7 +66,7 @@ class Users extends Connection
                 'user_fname' => $this->clean($this->inputs['user_fname']),
                 'user_lname' => $this->clean($this->inputs['user_lname']),
                 'user_category' => $this->clean($this->inputs['user_category']),
-                'birthdate' => $this->clean($this->inputs['birthdate']),
+                'birthdate' => $this->clean($this->inputs['birthdate']) ?? "0000-00-00",
                 'username'      => $username,
                 'password'      => $hashed_password
             );
