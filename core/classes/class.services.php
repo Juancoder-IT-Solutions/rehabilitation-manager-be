@@ -209,7 +209,8 @@ class Services extends Connection
             $form = array(
                 'task_name'       => $this->clean($this->inputs['task_name']),
                 'task_desc'       => $this->clean($this->inputs['task_desc']),
-                'stage_id'         => $this->clean($this->inputs['stage_id']),
+                'stage_id'        => $this->clean($this->inputs['stage_id']),
+                'service_id'      => $this->clean($this->inputs['service_id']),
             );
             $insert_query = $this->insert('tbl_service_stages_task', $form);
             if (!is_int($insert_query))
@@ -396,13 +397,12 @@ class Services extends Connection
     }
 
 
-    public static function total_services()
+    public function total_services()
     {
-        $self = new self;
-        $rehab_center_id = $self->clean($self->inputs['rehab_center_id']);
-        $self->query("USE rehab_management_{$rehab_center_id}_db");
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
         
-        $result = $self->select($self->table, "count(service_id) as total");
+        $result = $this->select($this->table, "count(*) as total");
         $row = $result->fetch_assoc();
         return $row['total'];
     }
