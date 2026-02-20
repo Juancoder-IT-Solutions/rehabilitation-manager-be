@@ -103,7 +103,9 @@ if (isset($_GET['action'])) {
         )),
         Routes::group('Payments', array_merge(
             Routes::post('add_payment', 'add'),
-            Routes::get('show_payments', 'show')
+            Routes::get('show_payments', 'show'),
+            Routes::post('add_payment_intent', 'add_payment_intent'),
+            Routes::post('attach_payment', 'attach_payment')
         ))
         
     );
