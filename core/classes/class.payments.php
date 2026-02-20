@@ -15,42 +15,36 @@ class Payments extends Connection
     public $authRehabCenterId = 0;
 
     private $PAYMONGO_SECRET_KEY = "sk_test_tNwv1cm2rhrE6pUgRE52KxNR";
-    private $PAYMONGO_PUBLIC_KEY = "pk_test_RsSJcBqjbQUnNsUHXW2gK6oy";
 
+    /** ----------------------
+     * Add payment record (local DB)
+     * ---------------------- */
     public function add()
     {
         try {
             $this->response = "success";
-
             $this->checker();
             $this->begin_transaction();
 
-            $admission_id                   =   $this->clean($this->inputs['admission_id']);
-            $rehab_center_id                =   $this->clean($this->inputs['rehab_center_id']);
-            $reference_number               =   $this->clean($this->inputs['reference_number']);
-            $user_id                        =   $this->clean($this->inputs['user_id']);
-            // $payment_date                   =   $this->clean($this->inputs['payment_date']);
+            $admission_id = $this->clean($this->inputs['admission_id']);
+            $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+            $reference_number = $this->clean($this->inputs['reference_number']);
+            $user_id = $this->clean($this->inputs['user_id']);
 
             $this->query("USE rehab_management_{$rehab_center_id}_db");
 
             $is_exist = $this->select($this->table, $this->pk, "reference_number = '$reference_number'");
+            if (!is_object($is_exist)) throw new Exception($is_exist);
+            if ($is_exist->num_rows > 0) return -2;
 
-            if (!is_object($is_exist))
-                throw new Exception($is_exist);
-
-            if ($is_exist->num_rows > 0) {
-                return -2;
-            }
-
-            $form = array(
-                'admission_id'          =>   $this->clean($this->inputs['admission_id']),
-                'user_id'               =>   $this->clean($this->inputs['user_id']),
-                'reference_number'      =>   $this->clean($this->inputs['reference_number']),
-                'payment_date'          =>   $this->getCurrentDate()
-            );
+            $form = [
+                'admission_id' => $admission_id,
+                'user_id' => $user_id,
+                'reference_number' => $reference_number,
+                'payment_date' => $this->getCurrentDate()
+            ];
             $insert_query = $this->insert($this->table, $form);
-            if (!is_int($insert_query))
-                throw new Exception($insert_query);
+            if (!is_int($insert_query)) throw new Exception($insert_query);
 
             $this->commit();
             return 1;
@@ -61,171 +55,182 @@ class Payments extends Connection
         }
     }
 
-    public function edit()
+    /** ----------------------
+     * Create PayMongo Payment Intent
+     * ---------------------- */
+    public function add_payment_intent()
     {
         try {
-            $this->response = "success";
+            $amount = intval($this->inputs['amount']);
+            $payment_method = $this->inputs['payment_method']; // gcash or paymaya
+            $admission_id = $this->clean($this->inputs['admission_id']);
+            $user_id = $this->clean($this->inputs['user_id']);
+            $rehab_center_id = $this->inputs['rehab_center_id'];
 
-            $this->checker();
-            $this->begin_transaction();
-
-            $primary_id         = $this->clean($this->inputs[$this->pk]);
-            $service_name       = $this->clean($this->inputs[$this->name]);
-            $is_exist           = $this->select($this->table, $this->pk, "service_name = '$service_name' AND  $this->pk != '$primary_id'");
-
-            if ($is_exist->num_rows > 0) {
-                return -2;
-            }
-
-            $form = array(
-                $this->name         => $this->clean($this->inputs[$this->name]),
-                'service_fee'       => $this->clean($this->inputs['service_fee']),
-                'service_desc'      => $this->clean($this->inputs['service_desc'])
-            );
-            $update_query = $this->update($this->table, $form, "$this->pk = '$primary_id'");
-
-            if (!is_int($update_query))
-                throw new Exception($update_query);
-
-            $this->commit();
-            return 1;
-        } catch (Exception $e) {
-            $this->rollback();  
-            $this->response = "error";
-            return $e->getMessage();
-        }
-    }
-
-    public function show()
-    {
-        $param = isset($this->inputs['param']) ? $this->inputs['param'] : null;
-        $rows = array();
-        $count = 1;
-        $result = $this->select($this->table, '*', $param);
-        while ($row = $result->fetch_assoc()) {
-            $row['count'] = $count++;
-            $rows[] = $row;
-        }
-        return $rows;
-    }
-
-    public function remove()
-    {
-        $ids = implode(",", $this->inputs['ids']);
-        return $this->delete($this->table, "$this->pk IN ($ids)");
-    }
-
-    public function add_payment_intent(){
-        $amount = $this->inputs['amount'];
-        $payment_method = $this->inputs['payment_method']; // gcash or dob
-        $rehab_center_id = $this->inputs['rehab_center_id'];
-
-        $data = [
-            "data" => [
-                "attributes" => [
-                    "amount" => $amount,
-                    "payment_method_allowed" => [$payment_method],
-                    "currency" => "PHP",
-                    "capture_type" => "automatic"
+            $data = [
+                "data" => [
+                    "attributes" => [
+                        "amount" => $amount,
+                        "currency" => "PHP",
+                        "payment_method_allowed" => [$payment_method],
+                        "capture_type" => "automatic"
+                    ]
                 ]
-            ]
-        ];
+            ];
 
-        $ch = curl_init("https://api.paymongo.com/v1/payment_intents");
+            $ch = curl_init("https://api.paymongo.com/v1/payment_intents");
+            curl_setopt_array($ch, [
+                CURLOPT_HTTPHEADER => [
+                    "Content-Type: application/json",
+                    "Authorization: Basic " . base64_encode($this->PAYMONGO_SECRET_KEY . ":")
+                ],
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode($data),
+                CURLOPT_RETURNTRANSFER => true
+            ]);
 
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            "Content-Type: application/json",
-            "Authorization: Basic " . base64_encode($this->PAYMONGO_SECRET_KEY . ":")
-        ]);
+            $response = curl_exec($ch);
+            if ($response === false) throw new Exception(curl_error($ch));
 
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $result = json_decode($response, true);
+            if (!isset($result['data']['id'])) throw new Exception("Payment intent failed");
 
-        $response = curl_exec($ch);
-        $result = json_decode($response, true);
+            $intentId = $result['data']['id'];
 
-        if (!isset($result['data']['id'])) {
-            return ["error" => "Payment intent failed"];
-            exit;
-        }
-
-        $intentId = $result['data']['id'];
-
-        /* SAVE TO DB */
-        $form = array(
-            'admission_id'          =>   $this->clean($this->inputs['admission_id']),
-            'payment_intent_id'     =>   $intentId,
-            'payment_method'        =>   $this->clean($this->inputs['payment_method']),
-            'user_id'               =>   $this->clean($this->inputs['user_id']),
-            'payment_date'          =>   $this->getCurrentDate()
-        );
-
-        try {
+            // Save to DB
             $this->checker();
             $this->begin_transaction();
             $this->query("USE rehab_management_{$rehab_center_id}_db");
-
-            $res = $this->insert($this->table, $form);
-
+            $form = [
+                'admission_id' => $admission_id,
+                'payment_intent_id' => $intentId,
+                'payment_method' => $payment_method,
+                'user_id' => $user_id,
+                'payment_date' => $this->getCurrentDate()
+            ];
+            $this->insert($this->table, $form);
             $this->commit();
-            return $intentId;
+
+            return [
+                "status" => "success",
+                "intent_id" => $intentId,
+                "client_key" => $result['data']['attributes']['client_key']
+            ];
+
         } catch (\Throwable $th) {
-            return "Error" .  $th;
+            $this->rollback();
+            return ["status" => "error", "message" => $th->getMessage()];
         }
     }
 
-    public function attach_payment(){
-        $intentId = $this->inputs['intent_id'];
-        $type = $this->inputs['payment_method']; // gcash or dob
+    /** ----------------------
+     * Attach Payment Method and return redirect URL
+     * ---------------------- */
+    public function attach_payment()
+    {
+        try {
+            $intentId = $this->inputs['intent_id'];
+            $methodType = $this->inputs['payment_method']; // gcash / paymaya
+            $returnUrl = "rehabmanager://payment-success?intent_id=$intentId";
 
-        // Step 1: Create payment method
-        $methodData = [
-            "data" => [
-                "attributes" => [
-                    "type" => $type
+            // Step 1: Create Payment Method
+            $methodData = [
+                "data" => [
+                    "attributes" => [
+                        "type" => $methodType
+                    ]
                 ]
-            ]
-        ];
+            ];
 
-        $ch = curl_init("https://api.paymongo.com/v1/payment_methods");
+            $ch = curl_init("https://api.paymongo.com/v1/payment_methods");
+            curl_setopt_array($ch, [
+                CURLOPT_HTTPHEADER => [
+                    "Content-Type: application/json",
+                    "Authorization: Basic " . base64_encode($this->PAYMONGO_SECRET_KEY . ":")
+                ],
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode($methodData),
+                CURLOPT_RETURNTRANSFER => true
+            ]);
 
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            "Content-Type: application/json",
-            "Authorization: Basic " . base64_encode($this->PAYMONGO_SECRET_KEY . ":")
-        ]);
+            $methodResp = curl_exec($ch);
+            if ($methodResp === false) throw new Exception(curl_error($ch));
 
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($methodData));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $methodRes = json_decode($methodResp, true);
+            if (!isset($methodRes['data']['id'])) throw new Exception("Payment method creation failed");
 
-        $methodResponse = curl_exec($ch);
-        $methodResult = json_decode($methodResponse, true);
+            $paymentMethodId = $methodRes['data']['id'];
 
-        $paymentMethodId = $methodResult['data']['id'];
-
-        // Step 2: Attach to intent
-        $attachData = [
-            "data" => [
-                "attributes" => [
-                    "payment_method" => $paymentMethodId,
-                    "return_url" => "rehabmanager://payment-success?intent_id=$intentId"
+            // Step 2: Attach Payment Method to Intent
+            $attachData = [
+                "data" => [
+                    "attributes" => [
+                        "payment_method" => $paymentMethodId,
+                        "return_url" => $returnUrl
+                    ]
                 ]
-            ]
-        ];
+            ];
 
-        $ch = curl_init("https://api.paymongo.com/v1/payment_intents/$intentId/attach");
+            $ch = curl_init("https://api.paymongo.com/v1/payment_intents/$intentId/attach");
+            curl_setopt_array($ch, [
+                CURLOPT_HTTPHEADER => [
+                    "Content-Type: application/json",
+                    "Authorization: Basic " . base64_encode($this->PAYMONGO_SECRET_KEY . ":")
+                ],
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode($attachData),
+                CURLOPT_RETURNTRANSFER => true
+            ]);
 
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            "Content-Type: application/json",
-            "Authorization: Basic " . base64_encode($this->PAYMONGO_SECRET_KEY . ":")
-        ]);
+            $attachResp = curl_exec($ch);
+            if ($attachResp === false) throw new Exception(curl_error($ch));
 
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($attachData));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $attachRes = json_decode($attachResp, true);
+            $redirectUrl = $attachRes['data']['attributes']['next_action']['redirect']['url'] ?? null;
 
-        $attachResponse = curl_exec($ch);
-        return json_decode($attachResponse);
+            if (!$redirectUrl) throw new Exception("Redirect URL not returned");
+
+            return [
+                "status" => "redirect",
+                "redirect_url" => $redirectUrl,
+                "intent_id" => $intentId
+            ];
+
+        } catch (\Throwable $th) {
+            return ["status" => "error", "message" => $th->getMessage()];
+        }
+    }
+
+    /** ----------------------
+     * Check Payment Intent Status
+     * ---------------------- */
+    public function check_status()
+    {
+        try {
+            $intentId = $this->inputs['intent_id'];
+
+            $ch = curl_init("https://api.paymongo.com/v1/payment_intents/$intentId");
+            curl_setopt_array($ch, [
+                CURLOPT_HTTPHEADER => [
+                    "Content-Type: application/json",
+                    "Authorization: Basic " . base64_encode($this->PAYMONGO_SECRET_KEY . ":")
+                ],
+                CURLOPT_RETURNTRANSFER => true
+            ]);
+
+            $resp = curl_exec($ch);
+            if ($resp === false) throw new Exception(curl_error($ch));
+
+            $result = json_decode($resp, true);
+            $status = $result['data']['attributes']['status'] ?? 'unknown';
+
+            return [
+                "intent_id" => $intentId,
+                "status" => $status
+            ];
+
+        } catch (\Throwable $th) {
+            return ["status" => "error", "message" => $th->getMessage()];
+        }
     }
 }
