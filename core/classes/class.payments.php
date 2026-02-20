@@ -178,12 +178,11 @@ class Payments extends Connection
         return ["intent_id" => $intentId];
     }
 
-    public function attach_payment()
-    {
-        $intentId = $this->inputs['intent_id'];
-        $type = $this->inputs['payment_method'];
+    public function attach_payment(){
+        return $intentId = $this->inputs['intent_id'];
+        $type = $this->inputs['payment_method']; // gcash or paymaya
 
-        // Create Payment Method
+        // Step 1: Create payment method
         $methodData = [
             "data" => [
                 "attributes" => [
@@ -202,21 +201,25 @@ class Payments extends Connection
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
         $methodResponse = curl_exec($ch);
+
+        if(curl_errno($ch)) {
+            return ["status" => "error", "message" => curl_error($ch)];
+        }
+
         $methodResult = json_decode($methodResponse, true);
 
-        if (!isset($methodResult['data']['id'])) {
-            return ["error" => "Payment method creation failed"];
+        if(!isset($methodResult['data']['id'])) {
+            return ["status" => "error", "message" => "Payment method creation failed", "response" => $methodResult];
         }
 
         $paymentMethodId = $methodResult['data']['id'];
 
-        // Attach payment method
+        // Step 2: Attach to intent
         $attachData = [
             "data" => [
                 "attributes" => [
                     "payment_method" => $paymentMethodId,
-                    "return_url" => "https://rehabmanager.org"
-                    // "return_url" => "rehabmanager://payment-success?intent_id=$intentId",
+                    "return_url" => "rehabmanager://payment-success?intent_id=$intentId"
                 ]
             ]
         ];
@@ -231,15 +234,20 @@ class Payments extends Connection
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
         $attachResponse = curl_exec($ch);
+
+        if(curl_errno($ch)) {
+            return ["status" => "error", "message" => curl_error($ch)];
+        }
+
         $attachResult = json_decode($attachResponse, true);
 
-        // Return structured data for Ionic
-        $redirectUrl = $attachResult['data']['attributes']['next_action']['redirect']['url'] ?? null;
-        $status = $attachResult['data']['attributes']['status'] ?? 'unknown';
+        if(!isset($attachResult['data']['attributes']['next_action']['redirect']['url'])) {
+            return ["status" => "unknown", "redirect_url" => null, "attach_result" => $attachResult];
+        }
 
         return [
-            "status" => $status,
-            "redirect_url" => $redirectUrl,
+            "status" => $attachResult['data']['attributes']['status'],
+            "redirect_url" => $attachResult['data']['attributes']['next_action']['redirect']['url'],
             "attach_result" => $attachResult
         ];
     }
