@@ -141,18 +141,15 @@ class RehabCenters extends Connection
     private function createTblAppointments($conn)
     {
         $sql = "CREATE TABLE IF NOT EXISTS `tbl_appointments` (
-        `appointment_id` INT(11) NOT NULL AUTO_INCREMENT,
-        `admission_id` INT(11) NOT NULL,
-        `rehab_center_id` INT(11) NOT NULL,
-        `remarks` TEXT DEFAULT NULL,
-        `appointment_date` DATE NOT NULL,
-        `status` VARCHAR(1) NOT NULL DEFAULT '',
-        `date_added` DATETIME NOT NULL DEFAULT current_timestamp(),
-        PRIMARY KEY (`appointment_id`),
-        KEY `idx_status_date` (`status`, `appointment_date`),
-        CONSTRAINT `fk_appointments_admission` FOREIGN KEY (`admission_id`) REFERENCES `tbl_admission`(`admission_id`) ON DELETE CASCADE,
-        CONSTRAINT `fk_appointments_rehab_center` FOREIGN KEY (`rehab_center_id`) REFERENCES `tbl_rehab_centers`(`rehab_center_id`) ON DELETE CASCADE
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+            `appointment_id` int(11) NOT NULL AUTO_INCREMENT,
+            `admission_id` int(11) NOT NULL,
+            `rehab_center_id` int(11) NOT NULL,
+            `remarks` text DEFAULT NULL,
+            `appointment_date` date NOT NULL,
+            `status` varchar(1) NOT NULL DEFAULT '',
+            `date_added` datetime NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`appointment_id`)
+            ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
 
         if (!$conn->query($sql)) {
             throw new Exception("Error creating tbl_appointments: " . $conn->error);
@@ -184,7 +181,7 @@ class RehabCenters extends Connection
     private function createTblAdmissionDetails($conn)
     {
         $sql = "CREATE TABLE IF NOT EXISTS `tbl_admission_details` (
-        `admission_detail_id` int(11) NOT NULL AUTO_INCREMENT,`
+        `admission_detail_id` int(11) NOT NULL AUTO_INCREMENT,
         `admission_id` int(11) NOT NULL DEFAULT 0,
         `input_id` int(11) NOT NULL DEFAULT 0,
         `input_value` text NOT NULL,
