@@ -175,7 +175,7 @@ class Payments extends Connection
             return ["error" => "DB insert failed: " . $th->getMessage()];
         }
 
-        return ["intent_id" => $intentId];
+        return $result;
     }
 
     public function attach_payment(){
@@ -220,6 +220,7 @@ class Payments extends Connection
                 "attributes" => [
                     "payment_method" => $paymentMethodId,
                     "return_url" => "rehabmanager://payment-success?intent_id=$intentId"
+                    // "return_url" => "https://rehabmanager.org/payment-success?intent_id=$intentId"
                 ]
             ]
         ];
