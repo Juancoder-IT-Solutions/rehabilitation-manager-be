@@ -74,7 +74,8 @@ if (isset($_GET['action'])) {
             Routes::post('add_service_stages_task', 'add_task'),
             Routes::post('update_service_stages_task', 'update_task'),
             Routes::post('delete_service_stages_task', 'delete_task'),
-            Routes::get('total_services', 'total_services')
+            Routes::get('total_services', 'total_services'),
+            
             
         )),
         Routes::group('RehabGallery', array_merge(
@@ -90,7 +91,20 @@ if (isset($_GET['action'])) {
             Routes::get('show_admission_mobile', 'show_mobile'),
             Routes::get('show_admission_details_mobile', 'show_detail_mobile'),
             Routes::get('show_admissions', 'show'),
-            Routes::get('total_admission', 'total_admission')
+            Routes::get('total_admission', 'total_admission'),
+            Routes::get('get_services_avail', 'get_services_avail'),
+            Routes::post('add_service_admission', 'add_service_admission'),
+            Routes::get('fetch_admission_tasks', 'fetch_admission_tasks'),
+            Routes::post('update_admission_tasks', 'update_admission_tasks'),
+            Routes::get('show_admission_history', 'show_admission_history'),
+            Routes::post('finish_admission', 'finish_admission'),
+            Routes::post('approve_admission', 'approve'),
+            Routes::post('delete_admission_service', 'delete_service'),
+            
+            Routes::get('admission_trends', 'admission_trends'),
+            Routes::get('show_admission_history_dashboard', 'show_admission_history_dashboard')
+            
+            
         )),
         Routes::group('AdmissionServices', array_merge(
             Routes::post('add_admission_service', 'add'),

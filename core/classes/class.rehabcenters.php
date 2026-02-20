@@ -112,7 +112,7 @@ class RehabCenters extends Connection
         $this->createTblServicesStages($conn);
         $this->createTblServiceStagesTask($conn);
         $this->createTblUsers($conn, $rehab_center_id, $this->inputs['username'], $this->inputs['password']);
-        $this->createTblAdmissionServices($conn);
+        // $this->createTblAdmissionServices($conn);
         $this->createTblServicesAvailed($conn);
         $this->createRehab($conn, $rehab_center_id);
         $this->createRehabGallery($conn);
@@ -127,6 +127,8 @@ class RehabCenters extends Connection
         `rehab_center_id` int(11) NOT NULL DEFAULT 0,
         `user_id` int(11) NOT NULL DEFAULT 0,
         `date_added` datetime NOT NULL DEFAULT current_timestamp(),
+        `start_date` date DEFAULT NULL,
+        `end_date` date DEFAULT NULL,
         `status` varchar(1) NOT NULL DEFAULT '',
         PRIMARY KEY (`admission_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
@@ -136,7 +138,8 @@ class RehabCenters extends Connection
     private function createTblAdmissionDetails($conn)
     {
         $sql = "CREATE TABLE IF NOT EXISTS `tbl_admission_details` (
-        `admission_detail_id` int(11) NOT NULL AUTO_INCREMENT,
+        `admission_detail_id` int(11) NOT NULL AUTO_INCREMENT,`
+        `admission_id` int(11) NOT NULL DEFAULT 0,
         `input_id` int(11) NOT NULL DEFAULT 0,
         `input_value` text NOT NULL,
         PRIMARY KEY (`admission_detail_id`)
@@ -152,6 +155,7 @@ class RehabCenters extends Connection
         `service_id` int(11) NOT NULL DEFAULT 0,
         `date_started` date DEFAULT NULL,
         `date_ended` date DEFAULT NULL,
+        `date_added` datetime NOT NULL DEFAULT current_timestamp(),
         PRIMARY KEY (`admission_service_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         if (!$conn->query($sql)) throw new Exception("Error creating tbl_admission_services: " . $conn->error);
@@ -161,9 +165,13 @@ class RehabCenters extends Connection
     {
         $sql = "CREATE TABLE IF NOT EXISTS `tbl_admission_tasks` (
         `admission_task_id` int(11) NOT NULL AUTO_INCREMENT,
+        `admission_id` int(11) NOT NULL DEFAULT 0,
+        `admission_service_id` int(11) NOT NULL DEFAULT 0,
+        `stage_id` int(11) NOT NULL DEFAULT 0,
         `task_id` int(11) NOT NULL DEFAULT 0,
         `remarks` varchar(50) NOT NULL DEFAULT '',
-        `date_added` datetime DEFAULT NULL,
+        `status` int(11) NOT NULL DEFAULT 0,
+        `date_added` datetime DEFAULT current_timestamp(),
         PRIMARY KEY (`admission_task_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         if (!$conn->query($sql)) throw new Exception("Error creating tbl_admission_tasks: " . $conn->error);
@@ -313,6 +321,7 @@ class RehabCenters extends Connection
         $sql = "CREATE TABLE IF NOT EXISTS `tbl_service_stages_task` (
         `task_id` int(11) NOT NULL AUTO_INCREMENT,
         `stage_id` int(11) NOT NULL DEFAULT 0,
+        `service_id` int(11) NOT NULL DEFAULT 0,
         `task_name` varchar(50) NOT NULL DEFAULT '',
         `task_desc` varchar(250) NOT NULL DEFAULT '',
         PRIMARY KEY (`task_id`)
