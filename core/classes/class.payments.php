@@ -215,7 +215,8 @@ class Payments extends Connection
             "data" => [
                 "attributes" => [
                     "payment_method" => $paymentMethodId,
-                    "return_url" => "rehabmanager://payment-success?intent_id=$intentId"
+                    "return_url" => "https://rehabmanager.org"
+                    // "return_url" => "rehabmanager://payment-success?intent_id=$intentId",
                 ]
             ]
         ];
