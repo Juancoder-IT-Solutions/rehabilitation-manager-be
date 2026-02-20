@@ -106,6 +106,7 @@ class RehabCenters extends Connection
         $this->createTblAdmissionDetails($conn);
         $this->createTblAdmissionServices($conn);
         $this->createTblAdmissionTasks($conn);
+        $this->createTblAppointments($conn);
         $this->createTblInputs($conn);
         $this->createTblInputOptions($conn);
         $this->createTblServices($conn);
@@ -175,6 +176,21 @@ class RehabCenters extends Connection
         PRIMARY KEY (`admission_task_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         if (!$conn->query($sql)) throw new Exception("Error creating tbl_admission_tasks: " . $conn->error);
+    }
+
+    private function createTblAppointments($conn)
+    {
+        $sql = "CREATE TABLE `tbl_appointments` (
+            `appointment_id` INT(11) NOT NULL AUTO_INCREMENT,
+            `admission_id` INT(11) NOT NULL,
+            `rehab_center_id` INT(11) NOT NULL,
+            `remarks` TEXT NULL DEFAULT NULL,
+            `appointment_date` DATE NOT NULL,
+            `status` VARCHAR(1) NOT NULL DEFAULT '',
+            `date_added` DATETIME NOT NULL DEFAULT current_timestamp(),
+            PRIMARY KEY (`appointment_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+        if (!$conn->query($sql)) throw new Exception("Error creating tbl_appointments: " . $conn->error);
     }
 
     private function createTblInputs($conn)
@@ -412,6 +428,7 @@ class RehabCenters extends Connection
     public function show_rehab_center_account()
     {
         $id = $this->clean($this->inputs['id']);
+        $allow_show_coordinates = $this->clean($this->inputs['allow_show_coordinates']);
 
         // use rehab center database
         $this->raw_query("USE rehab_management_" . $id . "_db");
@@ -421,8 +438,12 @@ class RehabCenters extends Connection
         // main profile
         $fetch_rehab_center = $this->select($this->table, "*", "rehab_center_id='$id'");
         $rehab_center_row = $fetch_rehab_center->fetch_assoc();
-        unset($rehab_center_row['rehab_center_coordinates']);
-        unset($rehab_center_row['rehab_center_complete_address']);
+
+        if(!$allow_show_coordinates){
+            unset($rehab_center_row['rehab_center_coordinates']);
+            unset($rehab_center_row['rehab_center_complete_address']);
+        }
+       
         $row['rehab_center_account'] = $rehab_center_row;
 
         // services
