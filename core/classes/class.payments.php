@@ -179,7 +179,7 @@ class Payments extends Connection
     }
 
     public function attach_payment(){
-        return $intentId = $this->inputs['intent_id'];
+        $intentId = $this->inputs['intent_id'];
         $type = $this->inputs['payment_method']; // gcash or paymaya
 
         // Step 1: Create payment method
