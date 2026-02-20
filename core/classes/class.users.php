@@ -21,14 +21,14 @@ class Users extends Connection
             $username = $this->clean($this->inputs['username']);
             $inputPassword = $this->inputs['password'];
 
-            $result = $this->select("tbl_users AS u LEFT JOIN tbl_rehab_centers AS r ON r.rehab_center_id = u.rehab_center_id","u.*","u.username = '$username' LIMIT 1");
+            $result = $this->select("tbl_users AS u LEFT JOIN tbl_rehab_centers AS r ON r.rehab_center_id = u.rehab_center_id", "u.*", "u.username = '$username' LIMIT 1");
 
             if ($result->num_rows === 0) {
                 -1;
             }
 
             $user = $result->fetch_assoc();
-            $user['user_category'] = $user['user_category_id'] == "S" ? "Staff" : "Admin";
+            // $user['user_category'] = $user['user_category_id'] == "S" ? "Staff" : "Admin";
             if (!password_verify($inputPassword, $user['password'])) {
                 return -1;
             }
@@ -84,6 +84,99 @@ class Users extends Connection
         }
     }
 
+    public function update_profile()
+    {
+        try {
+            $user_id = $this->clean($this->inputs['user_id']);
+            $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+
+            $this->query("USE rehab_management_{$rehab_center_id}_db");
+
+            $form = [
+                'user_fname'        => $this->clean($this->inputs['user_fname']),
+                'user_mname'        => $this->clean($this->inputs['user_mname']),
+                'user_lname'        => $this->clean($this->inputs['user_lname']),
+                'username'          => $this->clean($this->inputs['username']),
+                'permanent_address' => $this->clean($this->inputs['permanent_address']),
+                'birthdate'         => $this->clean($this->inputs['birthdate']),
+                'birth_place'       => $this->clean($this->inputs['birth_place']),
+                'nationality'       => $this->clean($this->inputs['nationality']),
+                'religion'          => $this->clean($this->inputs['religion']),
+                'occupation'        => $this->clean($this->inputs['occupation']),
+                'employer'          => $this->clean($this->inputs['employer']),
+                'employer_address'  => $this->clean($this->inputs['employer_address']),
+                'father_name'       => $this->clean($this->inputs['father_name']),
+                'father_address'    => $this->clean($this->inputs['father_address']),
+                'mother_name'       => $this->clean($this->inputs['mother_name']),
+                'mother_address'    => $this->clean($this->inputs['mother_address']),
+            ];
+
+            $update = $this->update($this->table, $form, "$this->pk = '$user_id'");
+
+            if ($update) {
+                return 1; // success
+            } else {
+                return 0; // failed
+            }
+        } catch (Exception $e) {
+            return 0; // error
+        }
+    }
+
+    public function view_rehab()
+    {
+        $user_id = $this->clean($this->inputs['user_id']);
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+
+        $result = $this->select(" tbl_rehab_centers", "*", "rehab_center_id='$rehab_center_id'");
+
+        if ($result->num_rows === 0) {
+            return null;
+        }
+
+        $row = $result->fetch_assoc();
+        unset($row['password']);
+        return $row;
+    }
+
+    public function update_password()
+    {
+        try {
+            $user_id = $this->clean($this->inputs['user_id']);
+            $oldPassword = $this->inputs['oldPassword'];
+            $newPassword = $this->inputs['newPassword'];
+
+            $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+            $this->query("USE rehab_management_{$rehab_center_id}_db");
+
+            $result = $this->select($this->table, '*', "rehab_center_id='$rehab_center_id' LIMIT 1");
+
+            if ($result->num_rows === 0) {
+                return -1;
+            }
+
+            $user = $result->fetch_assoc();
+
+            if (!password_verify($oldPassword, $user['password'])) {
+                return -2;
+            }
+
+            $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+
+            $update = $this->update($this->table, ['password' => $hashedPassword], "rehab_center_id='$rehab_center_id'");
+
+            if ($update) {
+                return 1;
+            } else {
+                return 0;
+            }
+        } catch (Exception $e) {
+            return 0;
+        }
+    }
+
     public function get_user()
     {
         $primary_id = $this->clean($this->inputs['id']);
@@ -96,7 +189,7 @@ class Users extends Connection
     public function update_user()
     {
         $user_id = $this->clean($this->inputs['user_id']);
-        
+
         $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
         $this->query("USE rehab_management_{$rehab_center_id}_db");
 
@@ -120,7 +213,8 @@ class Users extends Connection
 
         $result = $this->update($this->table, $form, "$this->pk  = '$user_id'");
         return $result;
-    }    public static function name($primary_id)
+    }
+    public static function name($primary_id)
     {
         $self = new self;
         $result = $self->select($self->table, $self->name, "$self->pk  = '$primary_id'");
