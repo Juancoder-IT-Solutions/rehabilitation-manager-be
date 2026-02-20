@@ -156,13 +156,13 @@ class Payments extends Connection
         $intentId = $result['data']['id'];
 
         // Save to DB
-        $form = [
+        $form = array(
             'admission_id' => $admission_id,
             'payment_intent_id' => $intentId,
             'payment_method' => $payment_method,
             'user_id' => $user_id,
             'payment_date' => $this->getCurrentDate()
-        ];
+        );
 
         try {
             $this->checker();
