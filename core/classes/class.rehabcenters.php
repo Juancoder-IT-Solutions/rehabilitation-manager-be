@@ -107,6 +107,7 @@ class RehabCenters extends Connection
         $this->createTblAdmissionServices($conn);
         $this->createTblAdmissionTasks($conn);
         $this->createTblAppointments($conn);
+        $this->createTblPayments($conn);
         $this->createTblInputs($conn);
         $this->createTblInputOptions($conn);
         $this->createTblServices($conn);
@@ -126,6 +127,7 @@ class RehabCenters extends Connection
         $sql = "CREATE TABLE IF NOT EXISTS `tbl_admission` (
         `admission_id` int(11) NOT NULL AUTO_INCREMENT,
         `rehab_center_id` int(11) NOT NULL DEFAULT 0,
+        `admission_reference_id` int(11) NOT NULL DEFAULT 0,
         `user_id` int(11) NOT NULL DEFAULT 0,
         `date_added` datetime NOT NULL DEFAULT current_timestamp(),
         `start_date` date DEFAULT NULL,
@@ -134,6 +136,49 @@ class RehabCenters extends Connection
         PRIMARY KEY (`admission_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         if (!$conn->query($sql)) throw new Exception("Error creating tbl_admission: " . $conn->error);
+    }
+
+    private function createTblAppointments($conn)
+    {
+        $sql = "CREATE TABLE IF NOT EXISTS `tbl_appointments` (
+        `appointment_id` INT(11) NOT NULL AUTO_INCREMENT,
+        `admission_id` INT(11) NOT NULL,
+        `rehab_center_id` INT(11) NOT NULL,
+        `remarks` TEXT DEFAULT NULL,
+        `appointment_date` DATE NOT NULL,
+        `status` VARCHAR(1) NOT NULL DEFAULT '',
+        `date_added` DATETIME NOT NULL DEFAULT current_timestamp(),
+        PRIMARY KEY (`appointment_id`),
+        KEY `idx_status_date` (`status`, `appointment_date`),
+        CONSTRAINT `fk_appointments_admission` FOREIGN KEY (`admission_id`) REFERENCES `tbl_admission`(`admission_id`) ON DELETE CASCADE,
+        CONSTRAINT `fk_appointments_rehab_center` FOREIGN KEY (`rehab_center_id`) REFERENCES `tbl_rehab_centers`(`rehab_center_id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+
+        if (!$conn->query($sql)) {
+            throw new Exception("Error creating tbl_appointments: " . $conn->error);
+        }
+    }
+
+    private function createTblPayments($conn)
+    {
+        $sql = "CREATE TABLE IF NOT EXISTS `tbl_payments` (
+        `payment_id` INT(11) NOT NULL AUTO_INCREMENT,
+        `admission_id` INT(11) NOT NULL DEFAULT 0,
+        `payment_intent_id` VARCHAR(50) NOT NULL DEFAULT '0',
+        `reference_number` VARCHAR(50) DEFAULT NULL,
+        `payment_method` VARCHAR(50) DEFAULT NULL,
+        `user_id` INT(11) NOT NULL DEFAULT 0,
+        `payment_date` DATE DEFAULT NULL,
+        `status` VARCHAR(1) DEFAULT 'S',
+        `date_added` DATETIME NOT NULL DEFAULT current_timestamp(),
+        PRIMARY KEY (`payment_id`),
+        KEY `idx_admission_user` (`admission_id`, `user_id`),
+        CONSTRAINT `fk_payments_admission` FOREIGN KEY (`admission_id`) REFERENCES `tbl_admission`(`admission_id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+
+        if (!$conn->query($sql)) {
+            throw new Exception("Error creating tbl_payments: " . $conn->error);
+        }
     }
 
     private function createTblAdmissionDetails($conn)
@@ -178,20 +223,6 @@ class RehabCenters extends Connection
         if (!$conn->query($sql)) throw new Exception("Error creating tbl_admission_tasks: " . $conn->error);
     }
 
-    private function createTblAppointments($conn)
-    {
-        $sql = "CREATE TABLE `tbl_appointments` (
-            `appointment_id` INT(11) NOT NULL AUTO_INCREMENT,
-            `admission_id` INT(11) NOT NULL,
-            `rehab_center_id` INT(11) NOT NULL,
-            `remarks` TEXT NULL DEFAULT NULL,
-            `appointment_date` DATE NOT NULL,
-            `status` VARCHAR(1) NOT NULL DEFAULT '',
-            `date_added` DATETIME NOT NULL DEFAULT current_timestamp(),
-            PRIMARY KEY (`appointment_id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
-        if (!$conn->query($sql)) throw new Exception("Error creating tbl_appointments: " . $conn->error);
-    }
 
     private function createTblInputs($conn)
     {
@@ -439,11 +470,11 @@ class RehabCenters extends Connection
         $fetch_rehab_center = $this->select($this->table, "*", "rehab_center_id='$id'");
         $rehab_center_row = $fetch_rehab_center->fetch_assoc();
 
-        if(!$allow_show_coordinates){
+        if (!$allow_show_coordinates) {
             unset($rehab_center_row['rehab_center_coordinates']);
             unset($rehab_center_row['rehab_center_complete_address']);
         }
-       
+
         $row['rehab_center_account'] = $rehab_center_row;
 
         // services
