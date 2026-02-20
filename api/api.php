@@ -36,7 +36,12 @@ if (isset($_GET['action'])) {
             Routes::post('update_user_login_status_logout', 'update_user_login_status_logout'),
             Routes::get('logout_user', 'logout'),
             Routes::get('preset_user', 'preset'),
-            Routes::get('schema_user', 'schema')
+            Routes::get('schema_user', 'schema'),
+            Routes::post('update_password', 'update_password'),
+            Routes::post('update_profile', 'update_profile'),
+            Routes::get('view_rehab', 'view_rehab'),
+            
+            
         )),
         Routes::group('Inputs', array_merge(
             Routes::post('add_inputs', 'add'),
@@ -100,7 +105,6 @@ if (isset($_GET['action'])) {
             Routes::post('finish_admission', 'finish_admission'),
             Routes::post('approve_admission', 'approve'),
             Routes::post('delete_admission_service', 'delete_service'),
-            
             Routes::get('admission_trends', 'admission_trends'),
             Routes::get('show_admission_history_dashboard', 'show_admission_history_dashboard')
             
@@ -113,7 +117,10 @@ if (isset($_GET['action'])) {
         )),
         Routes::group('Appointments', array_merge(
             Routes::post('add_appointment', 'add'),
-            Routes::get('show_appointments', 'show')
+            Routes::get('show_appointments', 'show'),
+            Routes::get('show_appointments_admin', 'show_appointments'),
+            Routes::post('update_appointment', 'edit'),
+            Routes::post('update_appointment_status', 'update_status')
         )),
         Routes::group('Payments', array_merge(
             Routes::post('add_payment', 'add'),
