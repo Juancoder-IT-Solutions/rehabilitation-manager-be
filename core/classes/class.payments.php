@@ -126,7 +126,7 @@ class Payments extends Connection
         $user_id = $this->inputs['user_id'];
 
         // Create Payment Intent
-        return $data = [
+        $data = [
             "data" => [
                 "attributes" => [
                     "amount" => $amount,
@@ -147,7 +147,7 @@ class Payments extends Connection
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
         $response = curl_exec($ch);
-        $result = json_decode($response, true);
+        return $result = json_decode($response, true);
 
         if (!isset($result['data']['id'])) {
             return ["error" => "Payment intent creation failed"];
