@@ -164,16 +164,16 @@ class Payments extends Connection
             'payment_date' => $this->getCurrentDate()
         );
 
-        try {
-            $this->checker();
-            $this->begin_transaction();
-            $this->query("USE rehab_management_{$rehab_center_id}_db");
-            $this->insert($this->table, $form);
-            $this->commit();
-        } catch (\Throwable $th) {
-            $this->rollback();
-            return ["error" => "DB insert failed: " . $th->getMessage()];
-        }
+        // try {
+        //     $this->checker();
+        //     $this->begin_transaction();
+        //     $this->query("USE rehab_management_{$rehab_center_id}_db");
+        //     $this->insert($this->table, $form);
+        //     $this->commit();
+        // } catch (\Throwable $th) {
+        //     $this->rollback();
+        //     return ["error" => "DB insert failed: " . $th->getMessage()];
+        // }
 
         return $result;
     }
