@@ -146,7 +146,13 @@ class Payments extends Connection
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-        return $response = curl_exec($ch);
+        $response = curl_exec($ch);
+
+        if ($response === false) {
+            echo "cURL Error Number: " . curl_errno($ch) . "<br>";
+            echo "cURL Error Message: " . curl_error($ch) . "<br>";
+        }
+
         $result = json_decode($response, true);
 
         if (!isset($result['data']['id'])) {
