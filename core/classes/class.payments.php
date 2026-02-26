@@ -153,7 +153,7 @@ class Payments extends Connection
             return ["error" => "Payment intent creation failed"];
         }
 
-        $intentId = $result['data']['id'];
+        return $intentId = $result['data']['id'];
 
         // Save to DB
         $form = array(
