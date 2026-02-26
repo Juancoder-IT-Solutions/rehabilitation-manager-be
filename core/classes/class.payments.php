@@ -146,8 +146,8 @@ class Payments extends Connection
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-        $response = curl_exec($ch);
-        return $result = json_decode($response, true);
+        return $response = curl_exec($ch);
+        $result = json_decode($response, true);
 
         if (!isset($result['data']['id'])) {
             return ["error" => "Payment intent creation failed"];
