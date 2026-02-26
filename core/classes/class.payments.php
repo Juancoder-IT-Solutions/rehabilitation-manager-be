@@ -126,7 +126,7 @@ class Payments extends Connection
         $user_id = $this->inputs['user_id'];
 
         // Create Payment Intent
-        $data = [
+        return $data = [
             "data" => [
                 "attributes" => [
                     "amount" => $amount,
@@ -153,7 +153,7 @@ class Payments extends Connection
             return ["error" => "Payment intent creation failed"];
         }
 
-        return $intentId = $result['data']['id'];
+        $intentId = $result['data']['id'];
 
         // Save to DB
         $form = array(
