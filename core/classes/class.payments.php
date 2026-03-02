@@ -109,14 +109,14 @@ class Payments extends Connection
         return $rows;
     }
 
-    public function show_payment_per_admission(){
+     public function show_per_rehab()
+    {
         $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
-        $admission_id = $this->clean($this->inputs['admission_id']);
         $this->query("USE rehab_management_{$rehab_center_id}_db");
-        
+
         $rows = array();
         $count = 1;
-        $result = $this->select($this->table, '*', $param);
+        $result = $this->select("$this->table p LEFT JOIN tbl_users u ON u.user_id=p.user_id", 'p.*, u.user_fname, u.user_mname, u.user_lname');
         while ($row = $result->fetch_assoc()) {
             $row['count'] = $count++;
             $rows[] = $row;

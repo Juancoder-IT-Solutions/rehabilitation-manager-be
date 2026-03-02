@@ -40,7 +40,10 @@ if (isset($_GET['action'])) {
             Routes::post('update_password', 'update_password'),
             Routes::post('update_profile', 'update_profile'),
             Routes::get('view_rehab', 'view_rehab'),
-            
+            Routes::post('request_password_reset', 'request_password_reset'),
+            Routes::post('reset_password_otp', 'reset_password_otp'),
+            Routes::post('add_rehab_user','add_rehab_user'),
+            Routes::post('update_rehab_user','update_rehab_user')
             
         )),
         Routes::group('Inputs', array_merge(
@@ -125,6 +128,7 @@ if (isset($_GET['action'])) {
         Routes::group('Payments', array_merge(
             Routes::post('add_payment', 'add'),
             Routes::get('show_payments', 'show'),
+            Routes::get('show_payment_rehab', 'show_per_rehab'),
             Routes::post('add_payment_intent', 'add_payment_intent'),
             Routes::post('attach_payment', 'attach_payment')
         ))
