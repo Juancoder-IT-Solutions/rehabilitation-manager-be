@@ -138,6 +138,7 @@ class RehabCenters extends Connection
         `admission_id` int(11) NOT NULL AUTO_INCREMENT,
         `rehab_center_id` int(11) NOT NULL DEFAULT 0,
         `admission_reference_id` int(11) NOT NULL DEFAULT 0,
+        `service_id` int(11) NOT NULL DEFAULT 0,
         `user_id` int(11) NOT NULL DEFAULT 0,
         `date_added` datetime NOT NULL DEFAULT current_timestamp(),
         `start_date` date DEFAULT NULL,

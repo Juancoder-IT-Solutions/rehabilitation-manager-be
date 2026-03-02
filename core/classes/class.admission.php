@@ -89,7 +89,12 @@ class Admission extends Connection
 
             $user_id                        =   $this->clean($this->inputs['user_id']);
             $rehab_center_id                =   $this->clean($this->inputs['rehab_center_id']);
+            $service_id                     =   $this->clean($this->inputs['service_id']);
             $form_data                      =   $this->clean($this->inputs['form_data']);
+
+            // get user profile
+            $fetch_user = $this->select("tbl_users", "*", "user_id='$user_id'");
+            $user_row = $fetch_user->fetch_assoc();
 
             $this->query("USE rehab_management_{$rehab_center_id}_db");
 
@@ -104,10 +109,11 @@ class Admission extends Connection
             }
 
             $form = array(
-                'user_id'                        =>   $this->clean($this->inputs['user_id']),
-                'rehab_center_id'                =>   $this->clean($this->inputs['rehab_center_id']),
-                'status'                         =>   'P',
-                'date_added'                     =>   $this->getCurrentDate()
+                'user_id'               =>   $this->clean($this->inputs['user_id']),
+                'rehab_center_id'       =>   $this->clean($this->inputs['rehab_center_id']),
+                'service_id'            =>   $this->clean($this->inputs['service_id']),
+                'status'                =>   'P',
+                'date_added'            =>   $this->getCurrentDate()
             );
 
             $admission_id = $this->insert($this->table, $form, "Y");
@@ -129,6 +135,37 @@ class Admission extends Connection
 
 
             if ($admission_id > 0) {
+                // add to users
+                $user_form = array(
+                    'user_id' => $user_row['user_id'],
+                    'user_fname' => $user_row['user_fname'],
+                    'user_mname' => $user_row['user_mname'],
+                    'user_lname' => $user_row['user_lname'],
+                    'permanent_address' => $user_row['permanent_address'],
+                    'contact_number' => $user_row['contact_number'],
+                    'birthdate' => $user_row['birthdate'],
+                    'birth_place' => $user_row['birth_place'],
+                    'nationality' => $user_row['nationality'],
+                    'religion' => $user_row['religion'],
+                    'occupation' => $user_row['occupation'],
+                    'employer' => $user_row['employer'],
+                    'employer_address' => $user_row['employer_address'],
+                    'father_name' => $user_row['father_name'],
+                    'father_address' => $user_row['father_address'],
+                    'mother_name' => $user_row['mother_name'],
+                    'mother_address' => $user_row['mother_address'],
+                    'user_category' => 'U',
+                    'mother_address' => $user_row['mother_address'],
+                    'username' => '',
+                    'password' => ''
+                );
+
+                $is_user_exists = $this->select("tbl_users", "*", "user_id='$user_row[user_id]'");
+
+                if ($is_user_exists->num_rows == 0) {
+                    $this->insert("tbl_users", $user_form);
+                }
+
                 // duplicate entry to main
                 $this->query("USE rehab_management_main_db");
                 $main_db_form = array(
@@ -156,7 +193,7 @@ class Admission extends Connection
 
         $service_id = $this->clean($this->inputs['service_id']);
         $admission_id = $this->clean($this->inputs['admission_id']);
-        $is_exist = $this->select('tbl_admission_services', '*', "service_id = '$service_id' AND admission_id = '{$this->inputs['admission_id']}'");
+        $is_exist = $this->select('tbl_admission_services', '*', "service_id = '$service_id' AND admission_id = '$admission_id'");
 
         if ($is_exist->num_rows > 0) {
             return -1;
