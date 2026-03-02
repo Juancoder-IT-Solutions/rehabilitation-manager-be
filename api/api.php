@@ -62,7 +62,7 @@ if (isset($_GET['action'])) {
         )),
         Routes::group('RehabCenters', array_merge(
             Routes::get('show_rehab_centers', 'show'),
-            Routes::get('show_public_rehab_centers', 'show_public'),
+            Routes::post('show_public_rehab_centers', 'show_public'),
             Routes::get('show_detail_mobile', 'show_rehab_center_account'), 
             Routes::post('register_rehab_center', 'register')
             
