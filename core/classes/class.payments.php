@@ -109,6 +109,21 @@ class Payments extends Connection
         return $rows;
     }
 
+    public function show_payment_per_admission(){
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $admission_id = $this->clean($this->inputs['admission_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+        
+        $rows = array();
+        $count = 1;
+        $result = $this->select($this->table, '*', $param);
+        while ($row = $result->fetch_assoc()) {
+            $row['count'] = $count++;
+            $rows[] = $row;
+        }
+        return $rows;
+    }
+
     public function remove()
     {
         $ids = implode(",", $this->inputs['ids']);
@@ -170,16 +185,16 @@ class Payments extends Connection
             'payment_date' => $this->getCurrentDate()
         );
 
-        // try {
-        //     $this->checker();
-        //     $this->begin_transaction();
-        //     $this->query("USE rehab_management_{$rehab_center_id}_db");
-        //     $this->insert($this->table, $form);
-        //     $this->commit();
-        // } catch (\Throwable $th) {
-        //     $this->rollback();
-        //     return ["error" => "DB insert failed: " . $th->getMessage()];
-        // }
+        try {
+            $this->checker();
+            $this->begin_transaction();
+            $this->query("USE rehab_management_{$rehab_center_id}_db");
+            $this->insert($this->table, $form);
+            $this->commit();
+        } catch (\Throwable $th) {
+            $this->rollback();
+            return ["error" => "DB insert failed: " . $th->getMessage()];
+        }
 
         return $result;
     }

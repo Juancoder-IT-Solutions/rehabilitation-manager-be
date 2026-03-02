@@ -445,7 +445,12 @@ class RehabCenters extends Connection
     {
         $rows = array();
         $count = 1;
-        $result = $this->select("$this->table rc LEFT JOIN tbl_services s ON rc.rehab_center_id=s.rehab_center_id LEFT JOIN tbl_rehab_center_gallery rg ON rc.rehab_center_id=rg.rehab_center_id", 'rc.rehab_center_id, rc.rehab_center_name, rc.rehab_center_city, rc.rehab_center_desc, rg.file as file_name, COUNT(DISTINCT(s.service_id)) as total_services', "rc.rehab_center_id > 0 GROUP BY rc.rehab_center_id ORDER BY rc.rehab_center_name ASC");
+        $user_lat = $this->clean($this->inputs['user_lat']) * 1;
+        $user_lng = $this->clean($this->inputs['user_lng']) * 1;
+        $distance_preference = $this->clean($this->inputs['distance_preference']) * 1;
+
+        $result = $this->select($this->table, "*", "rehab_center_id > 0");
+        // (6371 * ACOS(COS(RADIANS($user_lat)) * COS(RADIANS(SUBSTRING_INDEX(rc.rehab_center_coordinates, ',', 1))) * COS(RADIANS(SUBSTRING_INDEX(rc.rehab_center_coordinates, ',', -1)) - RADIANS($user_lng)) + SIN(RADIANS($user_lat)) * SIN(RADIANS(SUBSTRING_INDEX(rc.rehab_center_coordinates, ',', 1))))) AS distance_km
         while ($row = $result->fetch_assoc()) {
             $row['count'] = $count++;
             $rows[] = $row;
