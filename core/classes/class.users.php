@@ -31,7 +31,7 @@ class Users extends Connection
             $inputPassword = $this->inputs['password'];
 
 
-            $result = $this->select("tbl_users AS u LEFT JOIN tbl_rehab_centers AS r ON r.rehab_center_id = u.rehab_center_id", "u.*", "u.username = '$username' LIMIT 1");
+            $result = $this->select("tbl_users AS u LEFT JOIN tbl_rehab_centers AS r ON r.rehab_center_id = u.rehab_center_id", "u.*", "u.username = '$username' AND user_category != 'U' LIMIT 1");
 
             if ($result->num_rows === 0) {
                 return -1;

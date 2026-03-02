@@ -140,6 +140,7 @@ class RehabCenters extends Connection
         `admission_reference_id` int(11) NOT NULL DEFAULT 0,
         `service_id` int(11) NOT NULL DEFAULT 0,
         `user_id` int(11) NOT NULL DEFAULT 0,
+        `service_id` int(11) NOT NULL DEFAULT 0,
         `date_added` datetime NOT NULL DEFAULT current_timestamp(),
         `start_date` date DEFAULT NULL,
         `end_date` date DEFAULT NULL,
@@ -419,7 +420,6 @@ class RehabCenters extends Connection
             throw new Exception("Error creating tbl_users: " . $conn->error);
         }
 
-        // 2. If username and password are given, insert default record
         if ($username && $password) {
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
