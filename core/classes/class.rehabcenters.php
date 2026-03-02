@@ -456,14 +456,25 @@ class RehabCenters extends Connection
     {
         $rows = array();
         $count = 1;
-        $user_lat = $this->clean($this->inputs['user_lat']) * 1;
-        $user_lng = $this->clean($this->inputs['user_lng']) * 1;
-        $distance_preference = $this->clean($this->inputs['distance_preference']) * 1;
 
         $result = $this->select($this->table, "*", "rehab_center_id > 0");
         // (6371 * ACOS(COS(RADIANS($user_lat)) * COS(RADIANS(SUBSTRING_INDEX(rc.rehab_center_coordinates, ',', 1))) * COS(RADIANS(SUBSTRING_INDEX(rc.rehab_center_coordinates, ',', -1)) - RADIANS($user_lng)) + SIN(RADIANS($user_lat)) * SIN(RADIANS(SUBSTRING_INDEX(rc.rehab_center_coordinates, ',', 1))))) AS distance_km
         while ($row = $result->fetch_assoc()) {
             $row['count'] = $count++;
+            unset($row['rehab_center_coordinates']);
+            $rows[] = $row;
+        }
+        return $rows;
+    }
+
+    public function show_nearby_centers(){
+        $user_lat = $this->clean($this->inputs['user_lat']) * 1;
+        $user_lng = $this->clean($this->inputs['user_lng']) * 1;
+
+        $result = $this->select($this->table, "*, (6371 * ACOS(COS(RADIANS($user_lat)) * COS(RADIANS(SUBSTRING_INDEX(rehab_center_coordinates, ',', 1))) * COS(RADIANS(SUBSTRING_INDEX(rehab_center_coordinates, ',', -1)) - RADIANS($user_lng)) + SIN(RADIANS($user_lat)) * SIN(RADIANS(SUBSTRING_INDEX(rehab_center_coordinates, ',', 1))))) AS distance_km", "rehab_center_id > 0 HAVING distance_km <= 30");
+        while ($row = $result->fetch_assoc()) {
+            $row['count'] = $count++;
+            unset($row['rehab_center_coordinates']);
             $rows[] = $row;
         }
         return $rows;

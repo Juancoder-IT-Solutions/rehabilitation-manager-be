@@ -62,7 +62,8 @@ if (isset($_GET['action'])) {
         )),
         Routes::group('RehabCenters', array_merge(
             Routes::get('show_rehab_centers', 'show'),
-            Routes::post('show_public_rehab_centers', 'show_public'),
+            Routes::get('show_public_rehab_centers', 'show_public'),
+            Routes::post('show_nearby_centers', 'show_nearby_centers'),
             Routes::get('show_detail_mobile', 'show_rehab_center_account'), 
             Routes::post('register_rehab_center', 'register')
             
@@ -129,6 +130,7 @@ if (isset($_GET['action'])) {
         Routes::group('Payments', array_merge(
             Routes::post('add_payment', 'add'),
             Routes::get('show_payments', 'show'),
+            Routes::get('show_payment_mobile', 'show_mobile'),
             Routes::get('show_payment_rehab', 'show_per_rehab'),
             Routes::post('add_payment_intent', 'add_payment_intent'),
             Routes::post('attach_payment', 'attach_payment')
