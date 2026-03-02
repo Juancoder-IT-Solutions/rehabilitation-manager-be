@@ -525,9 +525,9 @@ class Admission extends Connection
     public function approve()
     {
         try {
-            $admission_ids = $this->inputs['admission_ids'];
-            $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
-            $start_date = $this->clean($this->inputs['start_date']);
+            $admission_ids    = $this->inputs['admission_ids'];
+            $rehab_center_id  = $this->clean($this->inputs['rehab_center_id']);
+            $start_date       = $this->clean($this->inputs['start_date']);
 
             if (empty($admission_ids) || empty($start_date)) {
                 throw new Exception("Admission IDs and start date are required.");
@@ -538,6 +538,7 @@ class Admission extends Connection
 
             $ids = implode(",", array_map('intval', $admission_ids));
 
+            // Approve admissions
             $update = $this->update(
                 $this->table,
                 [
@@ -551,12 +552,39 @@ class Admission extends Connection
                 throw new Exception($update);
             }
 
-            // Update main DB
+            foreach ($admission_ids as $admission_id) {
+                $fetch = $this->select($this->table, 'service_id', "admission_id='$admission_id'");
+                $row = $fetch->fetch_assoc();
+                $service_id = $row['service_id'];
+
+                if (!empty($service_id)) {
+                    $check = $this->select('tbl_admission_services', '*', "admission_id='$admission_id' AND service_id='$service_id'");
+                    if ($check->num_rows == 0) {
+                        // Insert service
+                        $admission_service_id = $this->insert('tbl_admission_services', [
+                            'admission_id' => $admission_id,
+                            'service_id' => $service_id
+                        ], 'Y');
+
+                        $fetch_stages = $this->select("tbl_service_stages_task", "*", "service_id='$service_id'");
+                        while ($sRow = $fetch_stages->fetch_assoc()) {
+                            $form_task = [
+                                'admission_id'         => $admission_id,
+                                'admission_service_id' => $admission_service_id,
+                                'stage_id'             => $sRow['stage_id'],
+                                'task_id'              => $sRow['task_id']
+                            ];
+                            $this->insert('tbl_admission_tasks', $form_task);
+                        }
+                    }
+                }
+            }
+
             $this->query("USE rehab_management_main_db");
             $this->update(
                 $this->table,
                 [
-                    'status'   => 'F',
+                    'status' => 'A',
                     'start_date' => $start_date
                 ],
                 "admission_id IN ($ids) AND rehab_center_id = '$rehab_center_id'"
@@ -566,6 +594,43 @@ class Admission extends Connection
             return 1;
         } catch (Exception $e) {
             $this->rollback();
+            $this->response = "error";
+            return $e->getMessage();
+        }
+    }
+
+    public function reject()
+    {
+        try {
+            $admission_ids   = $this->inputs['admission_ids'];
+            $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+
+            if (empty($admission_ids)) {
+                throw new Exception("Admission IDs are required.");
+            }
+
+            $this->query("USE rehab_management_{$rehab_center_id}_db");
+            $ids = implode(",", array_map('intval', $admission_ids));
+
+            $update = $this->update(
+                $this->table,
+                ['status' => 'D'],
+                "admission_id IN ($ids)"
+            );
+
+            if (!is_int($update)) {
+                throw new Exception($update);
+            }
+
+            $this->query("USE rehab_management_main_db");
+            $this->update(
+                $this->table,
+                ['status' => 'R'],
+                "admission_id IN ($ids) AND rehab_center_id = '$rehab_center_id'"
+            );
+
+            return 1;
+        } catch (Exception $e) {
             $this->response = "error";
             return $e->getMessage();
         }
