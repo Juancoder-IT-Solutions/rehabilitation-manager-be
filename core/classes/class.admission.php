@@ -334,24 +334,36 @@ class Admission extends Connection
 
     public function update_admission_tasks()
     {
-        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
-        $admission_id = $this->clean($this->inputs['admission_id']);
+        $rehab_center_id      = $this->clean($this->inputs['rehab_center_id']);
+        $admission_id         = $this->clean($this->inputs['admission_id']);
         $admission_service_id = $this->clean($this->inputs['admission_service_id']);
-        $checkedTasks = $this->inputs['checkedTasks'];
+        $tasksPayload         = $this->inputs['checkedTasks'];
 
         $this->query("USE rehab_management_{$rehab_center_id}_db");
+        $this->update(
+            "tbl_admission_tasks",
+            ['status' => 0, 'remarks' => null],
+            "admission_id = '$admission_id' AND admission_service_id = '$admission_service_id'"
+        );
 
-        $ids = implode(",", array_map('intval', $checkedTasks));
+        if (!empty($tasksPayload) && is_array($tasksPayload)) {
+            foreach ($tasksPayload as $task) {
+                $task_id = intval($task['admission_task_id']);
+                $remarks = $this->clean($task['remarks'] ?? '');
 
-        $this->update("tbl_admission_tasks", ['status' => 0], "admission_id = '$admission_id' AND admission_service_id='$admission_service_id'");
-
-        if (!empty($ids)) {
-            $this->update("tbl_admission_tasks", ['status' => 1],  "admission_id = '$admission_id' AND admission_service_id='$admission_service_id' AND admission_task_id IN ($ids)");
+                $this->update(
+                    "tbl_admission_tasks",
+                    [
+                        'status'  => 1,
+                        'remarks' => $remarks
+                    ],
+                    "admission_id = '$admission_id' AND admission_service_id = '$admission_service_id' AND admission_task_id = '$task_id'"
+                );
+            }
         }
 
         return 1;
     }
-
 
     public function remove()
     {
@@ -433,7 +445,7 @@ class Admission extends Connection
             'total_admissions' => 0,
             'active_admissions' => 0,
             'completed_admissions' => 0,
-            'monthly_admissions' => [], 
+            'monthly_admissions' => [],
             'total_services' => 0,
             'service_utilization' => 0
         ];

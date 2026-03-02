@@ -31,10 +31,14 @@ class RehabCenters extends Connection
 
             // Clean inputs
             $rehab_center_name           = $this->clean($this->inputs['rehab_center_name']);
+            $user_fname                  = $this->clean($this->inputs['user_fname']);
+            $user_mname                  = $this->clean($this->inputs['user_mname']);
+            $user_lname                  = $this->clean($this->inputs['user_lname']);
+            $email                       = $this->clean($this->inputs['user_email']);
             $hospital_code               = $this->clean($this->inputs['hospital_code']);
             $med_record_no               = $this->clean($this->inputs['med_record_no']);
             $rehab_center_city           = $this->clean($this->inputs['rehab_center_city']);
-            $rehab_center_complete_addr = $this->clean($this->inputs['rehab_center_complete_address']);
+            $rehab_center_complete_addr  = $this->clean($this->inputs['rehab_center_complete_address']);
             $rehab_center_coordinates    = $this->clean($this->inputs['rehab_center_coordinates']);
             $password_plain              = $this->clean($this->inputs['password']);
 
@@ -64,15 +68,21 @@ class RehabCenters extends Connection
             if (!is_int($rehab_center_id)) throw new Exception($rehab_center_id);
 
             $form = [
-                'username'   => $username,
-                'password'   => $hashed_password,
-                'rehab_center_id' => $rehab_center_id
+                
+                'user_fname'                    => $user_fname,
+                'user_mname'                    => $user_mname,
+                'user_lname'                    => $user_lname,
+                'email'                         => $email,
+                'username'                      => $username,
+                'password'                      => $hashed_password,
+                'rehab_center_id'               => $rehab_center_id,
+                'user_category'                 => 'R'
             ];
 
-            $this->insert("tbl_users", $form);
+            $user_id = $this->insert("tbl_users", $form, 'Y');
 
             $this->commit();
-            $this->createRehabCenterDatabase('rehab_management_' . $rehab_center_id, $rehab_center_id);
+            $this->createRehabCenterDatabase('rehab_management_' . $rehab_center_id, $rehab_center_id, $user_id);
             return 1;
         } catch (Exception $e) {
             $this->rollback();
@@ -81,7 +91,7 @@ class RehabCenters extends Connection
         }
     }
 
-    private function createRehabCenterDatabase($rehab_center_name, $rehab_center_id)
+    private function createRehabCenterDatabase($rehab_center_name, $rehab_center_id, $user_id)
     {
         $dbName = preg_replace('/[^a-zA-Z0-9_]/', '_', strtolower($rehab_center_name)) . '_db';
 
@@ -113,7 +123,7 @@ class RehabCenters extends Connection
         $this->createTblServices($conn);
         $this->createTblServicesStages($conn);
         $this->createTblServiceStagesTask($conn);
-        $this->createTblUsers($conn, $rehab_center_id, $this->inputs['username'], $this->inputs['password']);
+        $this->createTblUsers($conn, $rehab_center_id, $this->inputs['username'], $this->inputs['password'], $this->inputs['user_fname'], $this->inputs['user_mname'], $this->inputs['user_lname'], $this->inputs['user_email'], $user_id);
         // $this->createTblAdmissionServices($conn);
         $this->createTblServicesAvailed($conn);
         $this->createRehab($conn, $rehab_center_id);
@@ -373,14 +383,15 @@ class RehabCenters extends Connection
         if (!$conn->query($sql)) throw new Exception("Error creating tbl_service_stages_task: " . $conn->error);
     }
 
-    private function createTblUsers($conn, $rehab_center_id, $username = null, $password = null)
+    private function createTblUsers($conn, $rehab_center_id, $username = null, $password = null, $user_fname = null, $user_mname = null, $user_lname = null, $email = null, $user_id=0)
     {
-        // 1. Create the table
         $sql = "CREATE TABLE IF NOT EXISTS `tbl_users` (
         `user_id` int(11) NOT NULL AUTO_INCREMENT,
         `user_fname` varchar(30) NOT NULL,
         `user_mname` varchar(30) NOT NULL,
         `user_lname` varchar(30) NOT NULL,
+        `email` varchar(50) NOT NULL,
+        `otp_code` varchar(10) NOT NULL,
         `permanent_address` text NOT NULL,
         `contact_number` varchar(15) NOT NULL DEFAULT '',
         `birthdate` date NOT NULL,
@@ -412,21 +423,20 @@ class RehabCenters extends Connection
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
             $stmt = $conn->prepare("INSERT INTO `tbl_users` (
-            user_fname, user_mname, user_lname, permanent_address, contact_number,
+            user_id, user_fname, user_mname, user_lname, email,permanent_address, contact_number,
             birthdate, birth_place, nationality, religion, occupation, employer,
             employer_address, father_name, father_address, mother_name, mother_address,
             user_category, username, password, rehab_center_id) VALUES (
-            '', '', '', '', '', '0000-00-00', '', '', '', '', '', '', '', '', '', '',
+            ?, ?, ?, ?, ?, '', '', '0000-00-00', '', '', '', '', '', '', '', '', '', '',
             'R', ?, ?, ?)");
 
-            $stmt->bind_param("ssi", $username, $hashed_password, $rehab_center_id);
+            $stmt->bind_param("issssssi", $user_id, $user_fname, $user_mname, $user_lname, $email, $username, $hashed_password, $rehab_center_id);
 
             if (!$stmt->execute()) {
                 throw new Exception("Error inserting default user: " . $stmt->error);
             }
         }
     }
-
 
     public function show()
     {
