@@ -112,6 +112,8 @@ class Payments extends Connection
     public function show_mobile()
     {
         $admission_id = $this->clean($this->inputs['admission_id']);
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
         $rows = array();
         $count = 1;
         $result = $this->select($this->table, '*', "admission_id='$admission_id'");
@@ -147,11 +149,27 @@ class Payments extends Connection
 
     public function add_payment_intent()
     {
-        $amount = $this->inputs['amount'];
+        $amount = (int) round($this->inputs['amount'] * 100);
         $payment_method = $this->inputs['payment_method'];
         $rehab_center_id = $this->inputs['rehab_center_id'];
         $admission_id = $this->inputs['admission_id'];
         $user_id = $this->inputs['user_id'];
+
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+        $fetch_service_fee = $this->select("tbl_admission a LEFT JOIN tbl_services s ON a.service_id=s.service_id", "s.service_fee as service_fee", "a.admission_id='$admission_id'");
+        $service_fee_row = $fetch_service_fee->fetch_assoc();
+        // total payment
+        $fetch_total_payment = $this->select("tbl_payments", "SUM(payment_amount) as total_payment", "admission_id='$admission_id' AND status='A'");
+        $total_payment = $fetch_total_payment->fetch_assoc();
+
+        if($amount <= 0){
+            return -1; // not allowed 0 payment
+        }
+
+        if($total_payment['total_payment'] + ($amount/100) > $service_fee_row['service_fee']){
+            return -2; // over payment
+        }
+
 
         // Create Payment Intent
         $data = [
@@ -194,6 +212,7 @@ class Payments extends Connection
             'admission_id' => $admission_id,
             'payment_intent_id' => $intentId,
             'payment_method' => $payment_method,
+            'payment_amount' => $amount > 0 ? $amount/100 : 0,
             'user_id' => $user_id,
             'payment_date' => $this->getCurrentDate()
         );
@@ -201,7 +220,7 @@ class Payments extends Connection
         try {
             $this->checker();
             $this->begin_transaction();
-            $this->query("USE rehab_management_{$rehab_center_id}_db");
+            
             $this->insert($this->table, $form);
             $this->commit();
         } catch (\Throwable $th) {
@@ -214,7 +233,8 @@ class Payments extends Connection
 
     public function attach_payment(){
         $intentId = $this->inputs['intent_id'];
-        $type = $this->inputs['payment_method']; // gcash or paymaya
+        $type = $this->inputs['payment_method'];
+        $rehab_center_id = $this->inputs['rehab_center_id'];
 
         // Step 1: Create payment method
         $methodData = [
@@ -254,7 +274,7 @@ class Payments extends Connection
                 "attributes" => [
                     "payment_method" => $paymentMethodId,
                     // "return_url" => "rehabmanager://payment-success?intent_id=$intentId"
-                    "return_url" => "https://rehabmanager.org/payment-success?intent_id=$intentId"
+                    "return_url" => "https://rehabmanager.org/payment-success?intent_id=$intentId&rehab_id=$rehab_center_id"
                 ]
             ]
         ];
@@ -290,6 +310,8 @@ class Payments extends Connection
     public function check_status()
     {
         $intentId = $this->inputs['intent_id'];
+        $rehab_center_id = $this->inputs['rehab_center_id'];
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
 
         $ch = curl_init("https://api.paymongo.com/v1/payment_intents/$intentId");
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
@@ -302,6 +324,22 @@ class Payments extends Connection
         $result = json_decode($response, true);
 
         $status = $result['data']['attributes']['status'] ?? 'unknown';
+
+        if($status == "succeeded"){
+            $form = array(
+                'status' => 'A',
+            );
+
+            try {
+                $this->checker();
+                $this->begin_transaction();
+                
+                $this->update($this->table, $form, "payment_intent_id='$intentId'");
+                $this->commit();
+            } catch (\Throwable $th) {
+                $this->rollback();
+            }
+        }
 
         return ["status" => $status, "data" => $result];
     }

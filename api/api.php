@@ -98,6 +98,7 @@ if (isset($_GET['action'])) {
             Routes::post('add_admission', 'add'),
             Routes::post('add_admission_mobile', 'add_mobile'),
             Routes::get('show_admission_mobile', 'show_mobile'),
+            Routes::get('show_admission_detail_progress_mobile', 'show_admission_detail_progress'),
             Routes::get('show_admission_details_mobile', 'show_detail_mobile'),
             Routes::get('show_admissions', 'show'),
             Routes::get('total_admission', 'total_admission'),
@@ -133,7 +134,8 @@ if (isset($_GET['action'])) {
             Routes::get('show_payment_mobile', 'show_mobile'),
             Routes::get('show_payment_rehab', 'show_per_rehab'),
             Routes::post('add_payment_intent', 'add_payment_intent'),
-            Routes::post('attach_payment', 'attach_payment')
+            Routes::post('attach_payment', 'attach_payment'),
+            Routes::post('check_status', 'check_status')
         ))
         
     );

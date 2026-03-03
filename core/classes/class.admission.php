@@ -318,6 +318,45 @@ class Admission extends Connection
         return $rows;
     }
 
+    public function show_admission_detail_progress(){
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $admission_id = $this->clean($this->inputs['admission_id']);
+
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+        
+        $rows = array();
+        $result = $this->select("$this->table a LEFT JOIN tbl_services s ON a.service_id=s.service_id LEFT JOIN tbl_rehab_centers r ON a.rehab_center_id=r.rehab_center_id", 'a.*, s.service_name, s.service_fee, s.service_desc, r.rehab_center_name, r.rehab_center_coordinates', "a.admission_id='$admission_id'");
+        while ($row = $result->fetch_assoc()) {
+            $total_finish_tasks = 0;
+            $task_count = 0;
+            
+            $stage_rows = array();
+            $fetch_stages = $this->select('tbl_services_stages', '*', "service_id='$row[service_id]'");
+            while ($stage_row = $fetch_stages->fetch_assoc()) {
+                $task_rows = array();
+                $fetch_tasks = $this->select("tbl_service_stages_task sst LEFT JOIN tbl_admission_tasks adt ON sst.task_id=adt.task_id", "sst.*, adt.status", "sst.stage_id='$stage_row[stage_id]'");
+                while($task_row = $fetch_tasks->fetch_assoc()){
+                    $task_count++;
+                    if($task_row['status'] == 1){
+                        $total_finish_tasks++;
+                    }
+                    $task_rows[] = $task_row;
+                }
+
+                $stage_row['tasks_row'] = $task_rows;
+                $stage_rows[] = $stage_row;
+            }
+            
+            $row['stages'] = $stage_rows;
+            $row['task_count'] = $task_count;
+            $row['finish_task_count'] = $total_finish_tasks;
+            $row['progress_perc'] = $task_count > 0 ? number_format(($total_finish_tasks/$task_count) * 100, 2) : 0;
+            
+            $rows[] = $row;
+        }
+        return $rows;
+    }
+
     public function show_detail_mobile()
     {
         $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
