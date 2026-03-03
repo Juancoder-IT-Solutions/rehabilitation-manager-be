@@ -333,8 +333,19 @@ class Payments extends Connection
             try {
                 $this->checker();
                 $this->begin_transaction();
-                
+
                 $this->update($this->table, $form, "payment_intent_id='$intentId'");
+
+                $fetch_service_fee = $this->select("tbl_payments p LEFT JOIN tbl_admission a ON p.admission_id=a.admission_id LEFT JOIN tbl_services s ON a.service_id=s.service_id", "s.service_fee as service_fee, a.admission_id", "p.payment_intent_id='$intentId'");
+                $service_fee_row = $fetch_service_fee->fetch_assoc();
+                // total payment
+                $fetch_total_payment = $this->select("tbl_payments", "SUM(payment_amount) as total_payment", "admission_id='$service_fee_row[admission_id]' AND status='A'");
+                $total_payment = $fetch_total_payment->fetch_assoc();
+
+                if($total_payment['total_payment'] >= $service_fee_row['service_fee']){
+                    $this->update("tbl_admission", ['paid_status' => 'Y'], "admission_id='$service_fee_row[admission_id]'");
+                }
+
                 $this->commit();
             } catch (\Throwable $th) {
                 $this->rollback();
