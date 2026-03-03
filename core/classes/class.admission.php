@@ -663,7 +663,7 @@ class Admission extends Connection
                     'status' => 'A',
                     'start_date' => $start_date
                 ],
-                "admission_id IN ($ids) AND rehab_center_id = '$rehab_center_id'"
+                "admission_reference_id IN ($ids) AND rehab_center_id = '$rehab_center_id'"
             );
 
             $this->commit();
