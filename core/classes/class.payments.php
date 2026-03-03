@@ -109,6 +109,19 @@ class Payments extends Connection
         return $rows;
     }
 
+    public function show_mobile()
+    {
+        $admission_id = $this->clean($this->inputs['admission_id']);
+        $rows = array();
+        $count = 1;
+        $result = $this->select($this->table, '*', "admission_id='$admission_id'");
+        while ($row = $result->fetch_assoc()) {
+            $row['count'] = $count++;
+            $rows[] = $row;
+        }
+        return $rows;
+    }
+
      public function show_per_rehab()
     {
         $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
