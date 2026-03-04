@@ -144,6 +144,7 @@ class Users extends Connection
                 'user_lname'        => $this->clean($this->inputs['user_lname']),
                 'username'          => $this->clean($this->inputs['username']),
                 'permanent_address' => $this->clean($this->inputs['permanent_address']),
+                'rehab_center_desc' => $this->clean($this->inputs['rehab_center_desc']),
                 'contact_number'    => $this->clean($this->inputs['contact_number']),
             ];
 
