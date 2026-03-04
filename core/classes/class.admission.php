@@ -598,6 +598,39 @@ class Admission extends Connection
         return 1;
     }
 
+    public function update_status()
+    {
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $admission_id = $this->clean($this->inputs['admission_id']);
+        $status = $this->clean($this->inputs['status']);
+
+        $this->query("USE rehab_management_{$rehab_center_id}_db");
+
+        $update = $this->update(
+            $this->table,
+            [
+                'status' => $status
+            ],
+            "admission_id = '$admission_id'"
+        );
+
+        if (!is_int($update)) {
+            return $update;
+        }
+
+        // update main DB
+        $this->query("USE rehab_management_main_db");
+        $this->update(
+            $this->table,
+            [
+                'status' => $status
+            ],
+            "admission_reference_id = '$admission_id' AND rehab_center_id = '$rehab_center_id'"
+        );
+
+        return 1;
+    }
+
     public function approve()
     {
         try {

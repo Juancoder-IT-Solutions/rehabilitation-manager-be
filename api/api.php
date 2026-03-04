@@ -111,6 +111,7 @@ if (isset($_GET['action'])) {
             Routes::post('approve_admission', 'approve'),
             Routes::post('reject_admission', 'reject'),
             Routes::post('delete_admission_service', 'delete_service'),
+            Routes::post('update_admission_status', 'update_status'),
             Routes::get('admission_trends', 'admission_trends'),
             Routes::get('show_admission_history_dashboard', 'show_admission_history_dashboard')
             
