@@ -304,6 +304,16 @@ class Admission extends Connection
         }
     }
 
+    public function get_certificate(){
+        $tx_hash         = $this->inputs['dataHash'];
+
+        $this->query("USE rehab_management_main_db");
+
+        $fetch = $this->select("tbl_certificates", "*", "tx_hash='$tx_hash'");
+        $row = $fetch->fetch_assoc();
+        return $row;
+    }
+
     public function delete_service()
     {
         try {
