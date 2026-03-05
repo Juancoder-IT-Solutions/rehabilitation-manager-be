@@ -388,7 +388,7 @@ class Admission extends Connection
         $this->query("USE rehab_management_{$rehab_center_id}_db");
         $rows = array();
         $count = 1;
-        $result = $this->select("$this->table a LEFT JOIN tbl_users u ON u.user_id=a.user_id", 'a.*, u.user_fname, u.user_mname, u.user_lname');
+        $result = $this->select("$this->table a LEFT JOIN tbl_users u ON u.user_id=a.user_id LEFT JOIN tbl_certificates c ON a.admission_id=c.admission_id LEFT JOIN tbl_rehab_centers r ON a.rehab_center_id=r.rehab_center_id", 'a.*, u.user_fname, u.user_mname, u.user_lname, c.tx_hash, r.rehab_center_name, r.rehab_center_complete_address', "a.admission_id > 0 GROUP BY a.admission_id");
         while ($row = $result->fetch_assoc()) {
             $row['count'] = $count++;
             $row['user'] = $row['user_fname'] . " " . $row['user_mname'] . " " . $row['user_lname'];
