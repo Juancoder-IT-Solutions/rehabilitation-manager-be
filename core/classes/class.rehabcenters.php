@@ -141,11 +141,11 @@ class RehabCenters extends Connection
         `admission_reference_id` int(11) NOT NULL DEFAULT 0,
         `service_id` int(11) NOT NULL DEFAULT 0,
         `user_id` int(11) NOT NULL DEFAULT 0,
-        `service_id` int(11) NOT NULL DEFAULT 0,
         `date_added` datetime NOT NULL DEFAULT current_timestamp(),
         `start_date` date DEFAULT NULL,
         `end_date` date DEFAULT NULL,
         `status` varchar(1) NOT NULL DEFAULT '',
+        `paid_status` varchar(1) NOT NULL DEFAULT 'N',
         PRIMARY KEY (`admission_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         if (!$conn->query($sql)) throw new Exception("Error creating tbl_admission: " . $conn->error);
