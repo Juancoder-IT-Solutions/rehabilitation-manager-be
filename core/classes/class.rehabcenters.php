@@ -68,7 +68,7 @@ class RehabCenters extends Connection
             if (!is_int($rehab_center_id)) throw new Exception($rehab_center_id);
 
             $form = [
-                
+
                 'user_fname'                    => $user_fname,
                 'user_mname'                    => $user_mname,
                 'user_lname'                    => $user_lname,
@@ -123,6 +123,7 @@ class RehabCenters extends Connection
         $this->createTblServices($conn);
         $this->createTblServicesStages($conn);
         $this->createTblServiceStagesTask($conn);
+        $this->createTblCertificates($conn);
         $this->createTblUsers($conn, $rehab_center_id, $this->inputs['username'], $this->inputs['password'], $this->inputs['user_fname'], $this->inputs['user_mname'], $this->inputs['user_lname'], $this->inputs['user_email'], $user_id);
         // $this->createTblAdmissionServices($conn);
         $this->createTblServicesAvailed($conn);
@@ -385,7 +386,24 @@ class RehabCenters extends Connection
         if (!$conn->query($sql)) throw new Exception("Error creating tbl_service_stages_task: " . $conn->error);
     }
 
-    private function createTblUsers($conn, $rehab_center_id, $username = null, $password = null, $user_fname = null, $user_mname = null, $user_lname = null, $email = null, $user_id=0)
+    private function createTblCertificates($conn)
+    {
+        $sql = "CREATE TABLE IF NOT EXISTS `tbl_certificates` (
+        `certificate_id` int(11) NOT NULL AUTO_INCREMENT,
+        `admission_id` int(11) NOT NULL DEFAULT 0,
+        `rehab_center_id` int(11) NOT NULL DEFAULT 0,
+        `tx_hash` varchar(255) DEFAULT NULL,
+        `blockchain_hash` varchar(255) DEFAULT NULL,
+        `date_added` datetime DEFAULT current_timestamp(),
+        PRIMARY KEY (`certificate_id`)
+    ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
+
+        if (!$conn->query($sql)) {
+            throw new Exception("Error creating tbl_certificates: " . $conn->error);
+        }
+    }
+
+    private function createTblUsers($conn, $rehab_center_id, $username = null, $password = null, $user_fname = null, $user_mname = null, $user_lname = null, $email = null, $user_id = 0)
     {
         $sql = "CREATE TABLE IF NOT EXISTS `tbl_users` (
         `user_id` int(11) NOT NULL AUTO_INCREMENT,
@@ -467,7 +485,8 @@ class RehabCenters extends Connection
         return $rows;
     }
 
-    public function show_nearby_centers(){
+    public function show_nearby_centers()
+    {
         $user_lat = $this->clean($this->inputs['user_lat']) * 1;
         $user_lng = $this->clean($this->inputs['user_lng']) * 1;
 

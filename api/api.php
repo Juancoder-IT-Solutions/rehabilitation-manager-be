@@ -113,7 +113,9 @@ if (isset($_GET['action'])) {
             Routes::post('delete_admission_service', 'delete_service'),
             Routes::post('update_admission_status', 'update_status'),
             Routes::get('admission_trends', 'admission_trends'),
-            Routes::get('show_admission_history_dashboard', 'show_admission_history_dashboard')
+            Routes::get('show_admission_history_dashboard', 'show_admission_history_dashboard'),
+            Routes::post('add_admission_certificate', 'add_certificate'),
+            Routes::post('update_certificate_hash', 'update_certificate_hash')
             
             
         )),

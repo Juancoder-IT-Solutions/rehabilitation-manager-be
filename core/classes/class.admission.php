@@ -220,6 +220,90 @@ class Admission extends Connection
         return 1;
     }
 
+    public function add_certificate()
+    {
+        $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
+        $this->query("USE rehab_management_main_db");
+
+        $admission_id = $this->clean($this->inputs['admission_id']);
+        $is_exist = $this->select('tbl_certificates', '*', "rehab_center_id = '$rehab_center_id' AND admission_id = '$admission_id'");
+
+        if ($is_exist->num_rows > 0) {
+            return -1;
+        }
+
+        $form = array(
+            'admission_id'        => $this->clean($this->inputs['admission_id']),
+            'rehab_center_id'     => $this->clean($this->inputs['rehab_center_id']),
+            'tx_hash'             => '',
+            'blockchain_hash'     => '',
+        );
+        $insert_query = $this->insert('tbl_certificates', $form, 'Y');
+
+        if ($insert_query) {
+            return $insert_query;
+        } else {
+            return 0;
+        }
+    }
+
+    public function update_certificate_hash()
+    {
+        $rehab_center_id = $this->inputs['rehab_center_id'];
+        $certificate_id  = $this->clean($this->inputs['certificate_id']);
+        $tx_hash         = $this->inputs['dataHash'];
+        $blockchain_hash = $this->inputs['blockchain_hash'];
+
+        $this->query("USE rehab_management_main_db");
+
+        $form_update = array(
+            'tx_hash' => $tx_hash,
+            'blockchain_hash' => $blockchain_hash
+        );
+
+        $update_main = $this->update(
+            'tbl_certificates',
+            $form_update,
+            "certificate_id='$certificate_id'"
+        );
+
+        if (!$update_main) {
+            return 0;
+        }
+
+        $certificate = $this->select(
+            'tbl_certificates',
+            '*',
+            "certificate_id='$certificate_id'"
+        );
+
+        if ($certificate->num_rows == 0) {
+            return 0;
+        }
+
+        $row = $certificate->fetch_assoc();
+
+        $rehab_db = "rehab_management_" . $row['rehab_center_id'] . "_db";
+        $this->query("USE `$rehab_db`");
+
+        $insert_form = array(
+            'certificate_id' => $certificate_id,
+            'admission_id' => $row['admission_id'],
+            'rehab_center_id' => $row['rehab_center_id'],
+            'tx_hash' => $tx_hash,
+            'blockchain_hash' => $blockchain_hash
+        );
+
+
+        $insert_rehab = $this->insert('tbl_certificates', $insert_form);
+
+        if ($insert_rehab) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
     public function delete_service()
     {
         try {
@@ -318,26 +402,27 @@ class Admission extends Connection
         return $rows;
     }
 
-    public function show_admission_detail_progress(){
+    public function show_admission_detail_progress()
+    {
         $rehab_center_id = $this->clean($this->inputs['rehab_center_id']);
         $admission_id = $this->clean($this->inputs['admission_id']);
 
         $this->query("USE rehab_management_{$rehab_center_id}_db");
-        
+
         $rows = array();
         $result = $this->select("$this->table a LEFT JOIN tbl_services s ON a.service_id=s.service_id LEFT JOIN tbl_rehab_centers r ON a.rehab_center_id=r.rehab_center_id LEFT JOIN tbl_appointments ap ON ap.admission_id=a.admission_id", 'a.*, s.service_name, s.service_fee, s.service_desc, r.rehab_center_name, r.rehab_center_coordinates, ap.appointment_date, ap.`status` AS appointment_status', "a.admission_id='$admission_id'");
         while ($row = $result->fetch_assoc()) {
             $total_finish_tasks = 0;
             $task_count = 0;
-            
+
             $stage_rows = array();
             $fetch_stages = $this->select('tbl_services_stages', '*', "service_id='$row[service_id]'");
             while ($stage_row = $fetch_stages->fetch_assoc()) {
                 $task_rows = array();
                 $fetch_tasks = $this->select("tbl_service_stages_task sst LEFT JOIN tbl_admission_tasks adt ON sst.task_id=adt.task_id", "sst.*, adt.status, adt.remarks", "sst.stage_id='$stage_row[stage_id]'");
-                while($task_row = $fetch_tasks->fetch_assoc()){
+                while ($task_row = $fetch_tasks->fetch_assoc()) {
                     $task_count++;
-                    if($task_row['status'] == 1){
+                    if ($task_row['status'] == 1) {
                         $total_finish_tasks++;
                     }
                     $task_rows[] = $task_row;
@@ -346,12 +431,12 @@ class Admission extends Connection
                 $stage_row['tasks_row'] = $task_rows;
                 $stage_rows[] = $stage_row;
             }
-            
+
             $row['stages'] = $stage_rows;
             $row['task_count'] = $task_count;
             $row['finish_task_count'] = $total_finish_tasks;
-            $row['progress_perc'] = $task_count > 0 ? number_format(($total_finish_tasks/$task_count) * 100, 2) : 0;
-            
+            $row['progress_perc'] = $task_count > 0 ? number_format(($total_finish_tasks / $task_count) * 100, 2) : 0;
+
             $rows[] = $row;
         }
         return $rows;
